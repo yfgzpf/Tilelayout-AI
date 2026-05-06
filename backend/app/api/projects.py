@@ -47,6 +47,8 @@ class CalculateLayoutRequest(BaseModel):
     room_polygon: Optional[List[List[float]]] = None
     config: Optional[TileConfig] = None
     optimize: bool = False
+    door_position: Optional[Dict[str, Any]] = None  # {"edge_index": int, "position_ratio": float}
+    align_gap_to_door_center: bool = False
 
 
 class ProjectResponse(BaseModel):
@@ -295,6 +297,8 @@ async def calculate_layout_demo_endpoint(request: CalculateLayoutRequest):
             gap_width=request.config.gap_width,
             direction=request.config.direction,
             start_point=request.config.start_point,
+            door_position=request.door_position,
+            align_gap_to_door_center=request.align_gap_to_door_center,
             optimize=request.optimize,
         )
     except ValueError as e:
@@ -364,6 +368,8 @@ async def calculate_layout_endpoint(
             gap_width=tile_config.gap_width,
             direction=tile_config.direction,
             start_point=tile_config.start_point,
+            door_position=request.door_position,
+            align_gap_to_door_center=request.align_gap_to_door_center,
             optimize=request.optimize,
         )
     except ValueError as e:

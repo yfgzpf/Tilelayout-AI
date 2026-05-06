@@ -2,8 +2,9 @@
 排版计算引擎 — 纯 Python 数学实现（零外部几何依赖）
 
 使用射线法、鞋带公式和 Sutherland-Hodgman 裁剪实现精确几何计算。
+支持「缝对齐门中」的核心功能！
 """
-from typing import List, Dict, Any, Tuple
+from typing import List, Dict, Any, Tuple, Optional
 from dataclasses import dataclass
 import math
 
@@ -43,6 +44,17 @@ class Rect:
             Point(self.x + self.w, self.y + self.h),
             Point(self.x, self.y + self.h),
         ]
+
+
+@dataclass
+class DoorPosition:
+    """
+    门的位置标记
+    - 定义门所在的边缘
+    - 通过 edge_index + position_ratio (0~1) 确定门中心
+    """
+    edge_index: int  # 门所在的边索引（房间多边形的边）
+    position_ratio: float = 0.5  # 门中心在边上的位置比例（0=起点，1=终点）
 
 
 def _cross(v1: Point, v2: Point) -> float:
@@ -135,6 +147,8 @@ class LayoutEngine:
         gap_width: float = 0,
         direction: str = "horizontal",
         start_point: Tuple[float, float] = (0, 0),
+        door_position: Optional[DoorPosition] = None,
+        align_gap_to_door_center: bool = False,
     ):
         self._validate(room_polygon, tile_width, tile_height, gap_width, direction)
         self._room_raw = room_polygon
@@ -144,6 +158,79 @@ class LayoutEngine:
         self.gap_width = gap_width
         self.direction = direction
         self.start_point = start_point
+        self.door_position = door_position
+        self.align_gap_to_door_center = align_gap_to_door_center
+        
+        # 如果启用了对齐，计算正确的起铺点
+        if self.align_gap_to_door_center and self.door_position:
+            self.start_point = self._calculate_gap_aligned_start()
+
+    def _get_door_center(self) -> Point:
+        """
+        计算门中心点坐标
+        """
+        idx = self.door_position.edge_index
+        p1 = self._room_pts[idx]
+        p2 = self._room_pts[(idx + 1) % len(self._room_pts)]
+        ratio = self.door_position.position_ratio
+        
+        center_x = p1.x + (p2.x - p1.x) * ratio
+        center_y = p1.y + (p2.y - p1.y) * ratio
+        return Point(center_x, center_y)
+
+    def _is_edge_vertical(self, p1: Point, p2: Point) -> bool:
+        """
+        判断边是否近似垂直（上下方向的边）
+        """
+        return abs(p1.x - p2.x) < 1e-6
+
+    def _is_edge_horizontal(self, p1: Point, p2: Point) -> bool:
+        """
+        判断边是否近似水平（左右方向的边）
+        """
+        return abs(p1.y - p2.y) < 1e-6
+
+    def _calculate_gap_aligned_start(self) -> Tuple[float, float]:
+        """
+        核心算法：计算起铺点，让瓷砖缝隙精确对齐门中心
+        
+        逻辑：
+        - 如果门在垂直边 → 垂直缝对齐门（调整x方向起铺点）
+        - 如果门在水平边 → 水平缝对齐门（调整y方向起铺点）
+        """
+        if not self.door_position:
+            return (0, 0)
+        
+        min_x, min_y, max_x, max_y = polygon_bounds(self._room_pts)
+        door_center = self._get_door_center()
+        
+        # 获取门所在的边
+        idx = self.door_position.edge_index
+        edge_p1 = self._room_pts[idx]
+        edge_p2 = self._room_pts[(idx + 1) % len(self._room_pts)]
+        
+        tile_w_gap = self.tile_width + self.gap_width
+        tile_h_gap = self.tile_height + self.gap_width
+        
+        start_x = min_x
+        start_y = min_y
+        
+        if self._is_edge_vertical(edge_p1, edge_p2):
+            # 垂直边 → 调整X方向，让垂直缝对齐门中心
+            # 垂直缝位置：start_x, start_x + tile_w_gap, start_x + 2*tile_w_gap, ...
+            # 找到一个缝位置 = door_center.x
+            distance_to_door = door_center.x - min_x
+            num_tiles = math.floor(distance_to_door / tile_w_gap)
+            # 让第 num_tiles 个缝正好对齐门中心
+            start_x = door_center.x - num_tiles * tile_w_gap
+            
+        elif self._is_edge_horizontal(edge_p1, edge_p2):
+            # 水平边 → 调整Y方向，让水平缝对齐门中心
+            distance_to_door = door_center.y - min_y
+            num_tiles = math.floor(distance_to_door / tile_h_gap)
+            start_y = door_center.y - num_tiles * tile_h_gap
+            
+        return (start_x, start_y)
 
     def _validate(self, polygon, tw, th, gap, direction):
         if len(polygon) < 3:
@@ -283,8 +370,18 @@ def calculate_tile_layout(
     gap_width: float = 0,
     direction: str = "horizontal",
     start_point: Tuple[float, float] = (0, 0),
+    door_position: Optional[Dict[str, Any]] = None,
+    align_gap_to_door_center: bool = False,
     optimize: bool = False,
 ) -> Dict[str, Any]:
+    # 构建 DoorPosition 对象
+    door_pos_obj = None
+    if door_position:
+        door_pos_obj = DoorPosition(
+            edge_index=door_position.get("edge_index", 0),
+            position_ratio=door_position.get("position_ratio", 0.5)
+        )
+    
     engine = LayoutEngine(
         room_polygon=room_polygon,
         tile_width=tile_width,
@@ -292,6 +389,8 @@ def calculate_tile_layout(
         gap_width=gap_width,
         direction=direction,
         start_point=start_point,
+        door_position=door_pos_obj,
+        align_gap_to_door_center=align_gap_to_door_center,
     )
     if optimize:
         return engine.optimize_layout()
