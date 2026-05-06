@@ -44,6 +44,7 @@ class ProjectUpdate(BaseModel):
 
 class CalculateLayoutRequest(BaseModel):
     texture_id: Optional[str] = None
+    room_polygon: Optional[List[List[float]]] = None
     config: Optional[TileConfig] = None
     optimize: bool = False
 
@@ -278,6 +279,38 @@ async def delete_project(
     return {"success": True, "data": {"message": f"项目 {project_id} 已删除"}}
 
 
+@router.post("/calculate/demo")
+async def calculate_layout_demo_endpoint(request: CalculateLayoutRequest):
+    """演示模式下的排版计算，不需要认证"""
+    if not request.config:
+        raise HTTPException(status_code=400, detail="请提供瓷砖配置")
+    
+    room_polygon = request.room_polygon if (request.room_polygon and len(request.room_polygon) >= 3) else [[0, 0], [3000, 0], [3000, 4000], [0, 4000]]
+    
+    try:
+        layout_result = calculate_tile_layout(
+            room_polygon=room_polygon,
+            tile_width=request.config.tile_width,
+            tile_height=request.config.tile_height,
+            gap_width=request.config.gap_width,
+            direction=request.config.direction,
+            start_point=request.config.start_point,
+            optimize=request.optimize,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"排版计算失败: {str(e)}")
+    
+    return {
+        "success": True,
+        "data": {
+            "tiles": layout_result["tiles"],
+            "statistics": layout_result["statistics"],
+        }
+    }
+
+
 @router.post("/{project_id}/calculate")
 async def calculate_layout_endpoint(
     project_id: str,
@@ -286,6 +319,11 @@ async def calculate_layout_endpoint(
     db: AsyncSession = Depends(get_db),
 ):
     """执行排版计算"""
+    # 如果是演示模式，直接返回演示结果
+    if project_id == 'demo':
+        demo_result = await calculate_layout_demo_endpoint(request)
+        return demo_result
+    
     try:
         pid = uuid.UUID(project_id)
     except ValueError:
@@ -299,7 +337,10 @@ async def calculate_layout_endpoint(
     if not project:
         raise HTTPException(status_code=404, detail="项目不存在")
     
-    if not project.room_polygon or len(project.room_polygon) < 3:
+    # 使用请求中的房间数据，或者项目中保存的房间数据
+    room_polygon = request.room_polygon if (request.room_polygon and len(request.room_polygon) >= 3) else project.room_polygon
+    
+    if not room_polygon or len(room_polygon) < 3:
         raise HTTPException(status_code=400, detail="户型轮廓至少需要3个顶点")
     
     tile_config = request.config
@@ -317,7 +358,7 @@ async def calculate_layout_endpoint(
     
     try:
         layout_result = calculate_tile_layout(
-            room_polygon=project.room_polygon,
+            room_polygon=room_polygon,
             tile_width=tile_config.tile_width,
             tile_height=tile_config.tile_height,
             gap_width=tile_config.gap_width,

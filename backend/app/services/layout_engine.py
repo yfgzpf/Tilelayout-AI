@@ -157,48 +157,82 @@ class LayoutEngine:
 
     def _tile_intersects_room(self, rx: float, ry: float) -> Tuple[bool, bool, float, float]:
         rect = Rect(rx, ry, self.tile_width, self.tile_height)
+        
+        # 简单的相交判断 - 检查瓷砖中心点是否在房间内
+        center_x = rx + self.tile_width / 2
+        center_y = ry + self.tile_height / 2
+        center_inside = point_in_polygon(Point(center_x, center_y), self._room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任何顶点是否在房间内
+            tile_corners = rect.corners()
+            any_corner_inside = any(point_in_polygon(corner, self._room_pts) for corner in tile_corners)
+            
+            if not any_corner_inside:
+                # 检查房间顶点是否在瓷砖内
+                tile_min_x, tile_min_y = rx, ry
+                tile_max_x, tile_max_y = rx + self.tile_width, ry + self.tile_height
+                
+                room_has_point_in_tile = False
+                for pt in self._room_pts:
+                    if (tile_min_x <= pt.x <= tile_max_x and tile_min_y <= pt.y <= tile_max_y):
+                        room_has_point_in_tile = True
+                        break
+                
+                if not room_has_point_in_tile:
+                    return False, False, self.tile_width, self.tile_height
+        
+        # 现在检查是否需要切割
         clipped = clip_rect_by_polygon(rect, self._room_pts)
-        if len(clipped) < 3:
-            return False, False, self.tile_width, self.tile_height
-        clip_area = polygon_area(clipped)
-        if clip_area < 0.001:
-            return False, False, self.tile_width, self.tile_height
-
+        clip_area = polygon_area(clipped) if len(clipped) >= 3 else 0
+        
         tile_area = self.tile_width * self.tile_height
-        is_cut = abs(clip_area - tile_area) > 0.5
-        bx, by, _, _ = polygon_bounds(clipped)
-        actual_w = min(max(p.x for p in clipped) - min(p.x for p in clipped), self.tile_width)
-        actual_h = min(max(p.y for p in clipped) - min(p.y for p in clipped), self.tile_height)
-        return True, is_cut, actual_w, actual_h
+        is_cut = clip_area < tile_area * 0.999
+        
+        if is_cut and len(clipped) >= 3:
+            bx, by, _, _ = polygon_bounds(clipped)
+            actual_w = max(p.x for p in clipped) - min(p.x for p in clipped)
+            actual_h = max(p.y for p in clipped) - min(p.y for p in clipped)
+            return True, is_cut, min(actual_w, self.tile_width), min(actual_h, self.tile_height)
+        
+        return True, is_cut, self.tile_width, self.tile_height
 
     def calculate_layout(self) -> Dict[str, Any]:
         tiles: List[Dict] = []
         tile_id = 1
         min_x, min_y, max_x, max_y = polygon_bounds(self._room_pts)
 
-        atw = self.tile_width + self.gap_width
-        ath = self.tile_height + self.gap_width
-        if self.direction == "vertical":
-            atw, ath = ath, atw
-
-        sx = self.start_point[0] if self.start_point[0] != 0 else min_x
-        sy = self.start_point[1] if self.start_point[1] != 0 else min_y
-
-        cols = int(math.ceil((max_x - min_x) / atw)) + 2
-        rows = int(math.ceil((max_y - min_y) / ath)) + 2
-
-        for row in range(-1, rows):
-            for col in range(-1, cols):
-                x = sx + col * atw
-                y = sy + row * ath
-                hits, is_cut, aw, ah = self._tile_intersects_room(x, y)
+        # 计算瓷砖网格参数
+        tile_w_gap = self.tile_width + self.gap_width
+        tile_h_gap = self.tile_height + self.gap_width
+        
+        # 处理起铺点 - 如果未指定，则从房间左上角开始
+        start_x = self.start_point[0] if self.start_point else min_x
+        start_y = self.start_point[1] if self.start_point else min_y
+        
+        # 计算需要覆盖整个房间的网格范围
+        # 向左和向下扩展以确保覆盖整个房间
+        offset_left = math.floor((min_x - start_x) / tile_w_gap) - 2
+        offset_top = math.floor((min_y - start_y) / tile_h_gap) - 2
+        
+        # 向右和向上扩展
+        offset_right = math.ceil((max_x - start_x) / tile_w_gap) + 2
+        offset_bottom = math.ceil((max_y - start_y) / tile_h_gap) + 2
+        
+        # 遍历瓷砖
+        for row_offset in range(offset_top, offset_bottom + 1):
+            for col_offset in range(offset_left, offset_right + 1):
+                tile_x = start_x + col_offset * tile_w_gap
+                tile_y = start_y + row_offset * tile_h_gap
+                
+                hits, is_cut, actual_w, actual_h = self._tile_intersects_room(tile_x, tile_y)
                 if hits:
                     tiles.append({
                         "id": str(tile_id),
-                        "x": round(x, 2),
-                        "y": round(y, 2),
-                        "width": round(aw, 2),
-                        "height": round(ah, 2),
+                        "x": round(tile_x, 2),
+                        "y": round(tile_y, 2),
+                        "width": round(actual_w, 2),
+                        "height": round(actual_h, 2),
                         "rotation": 0,
                         "is_cut": is_cut,
                     })

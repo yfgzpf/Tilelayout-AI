@@ -1,21 +1,43 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button, Card, Space, Typography, Spin, message, Row, Col, Alert, InputNumber, Select } from 'antd';
-import { ArrowLeftOutlined, DownloadOutlined, PrinterOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, DownloadOutlined, PrinterOutlined, RefreshOutlined } from '@ant-design/icons';
 import { Logo } from '../components/Logo';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
-interface StatData { total_tiles: number; whole_tiles: number; cut_tiles: number; waste_percentage: number; total_area_sq_m: number; }
+
+interface StatData { 
+  total_tiles: number; 
+  whole_tiles: number; 
+  cut_tiles: number; 
+  waste_percentage: number; 
+  total_area_sq_m: number; 
+}
+
+interface TileData {
+  id: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  rotation: number;
+  is_cut: boolean;
+}
+
+interface LayoutResult {
+  tiles: TileData[];
+  statistics: StatData;
+}
 
 const COLORS = { whole: '#1a365d', cut: '#d4a574' };
 const API_BASE = '/api/v1';
 
-// 模拟房间多边形数据
+// 模拟房间多边形数据 (单位 mm)
 const ROOM_POLYGON = [[0, 0], [3000, 0], [3000, 4000], [0, 4000]];
 
-async function fetchLayout(projectId: string, config: any) {
-  const resp = await fetch(`${API_BASE}/projects/${projectId}/calculate`, {
+async function fetchLayout(projectId: string, config: any): Promise<LayoutResult> {
+  const response = await fetch(`${API_BASE}/projects/${projectId}/calculate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -29,23 +51,22 @@ async function fetchLayout(projectId: string, config: any) {
       },
     }),
   });
-  if (!resp.ok) {
-    const errText = await resp.text();
-    let msg = `请求失败(${resp.status})`;
-    try { const j = JSON.parse(errText); msg = j.detail || msg; } catch {}
-    throw new Error(msg);
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`请求失败 (${response.status}): ${errText}`);
   }
-  return resp.json();
+  const jsonData = await response.json();
+  return (jsonData && jsonData.data) ? jsonData.data : jsonData;
 }
 
 const LayoutPreview: React.FC = () => {
   const nav = useNavigate();
-  const [params] = useSearchParams();
-  const projectId = params.get('projectId') || 'demo';
+  const [searchParams] = useSearchParams();
+  const projectId = searchParams.get('projectId') || 'demo';
   const canvasRef = useRef<HTMLDivElement>(null);
 
   const [loading, setLoading] = useState(true);
-  const [tiles, setTiles] = useState<any[]>([]);
+  const [tiles, setTiles] = useState<TileData[]>([]);
   const [stats, setStats] = useState<StatData | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -54,14 +75,37 @@ const LayoutPreview: React.FC = () => {
     tileWidth: 800,
     tileHeight: 800,
     gapWidth: 3,
-    direction: 'horizontal',
+    direction: 'horizontal' as 'horizontal' | 'vertical' | 'diagonal',
     startX: 0,
     startY: 0,
   });
 
   const [isDragging, setIsDragging] = useState(false);
 
-  // 计算画布尺寸和缩放
+  // 加载排版
+  const loadLayout = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const result = await fetchLayout(projectId, tileConfig);
+      setTiles(result.tiles);
+      setStats(result.statistics);
+      if (result.tiles.length === 0) {
+        setError('排版计算无数据返回，请检查房间是否正确绘制');
+      }
+    } catch (e: any) {
+      setError(e.message || '网络错误');
+      message.error('加载排版失败');
+    } finally {
+      setLoading(false);
+    }
+  }, [projectId, tileConfig]);
+
+  useEffect(() => {
+    loadLayout();
+  }, [loadLayout]);
+
+  // 计算画布边界和缩放
   const { scale, offsetX, offsetY, bounds } = useMemo(() => {
     const allPoints = [...ROOM_POLYGON];
     if (tiles.length > 0) {
@@ -74,41 +118,30 @@ const LayoutPreview: React.FC = () => {
     const minY = Math.min(...allPoints.map(p => p[1]));
     const maxX = Math.max(...allPoints.map(p => p[0]));
     const maxY = Math.max(...allPoints.map(p => p[1]));
-    const scale = Math.min(760 / (maxX - minX || 1), 480 / (maxY - minY || 1), 1);
-    return { scale, offsetX: 20, offsetY: 20, bounds: { minX, minY, maxX, maxY } };
+    
+    const canvasWidth = 760;
+    const canvasHeight = 480;
+    const roomWidth = maxX - minX;
+    const roomHeight = maxY - minY;
+    
+    const scaleX = canvasWidth / roomWidth;
+    const scaleY = canvasHeight / roomHeight;
+    const scale = Math.min(scaleX, scaleY, 1);
+    
+    return { 
+      scale, 
+      offsetX: 20, 
+      offsetY: 20, 
+      bounds: { minX, minY, maxX, maxY } 
+    };
   }, [tiles]);
-
-  // 加载排版
-  const loadLayout = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const r = await fetchLayout(projectId, tileConfig);
-      const d = (r && r.data) ? r.data : r;
-      const tileList = d?.tiles || [];
-      const statData = d?.statistics || null;
-      setTiles(tileList);
-      setStats(statData);
-      if (tileList.length === 0 && !statData) {
-        setError('排版计算无数据返回，请确认后端服务运行中');
-      }
-    } catch (e: any) {
-      const msg = e?.message || (typeof e === 'string' ? e : '网络错误');
-      setError(String(msg));
-    } finally {
-      setLoading(false);
-    }
-  }, [projectId, tileConfig]);
-
-  useEffect(() => {
-    loadLayout();
-  }, [loadLayout]);
 
   // 坐标转换
   const toCanvas = (x: number, y: number) => ({
     x: (x - bounds.minX) * scale + offsetX,
     y: (y - bounds.minY) * scale + offsetY,
   });
+  
   const fromCanvas = (cx: number, cy: number) => ({
     x: Math.round((cx - offsetX) / scale + bounds.minX),
     y: Math.round((cy - offsetY) / scale + bounds.minY),
@@ -136,8 +169,8 @@ const LayoutPreview: React.FC = () => {
     const cy = e.clientY - rect.top;
     const { x, y } = fromCanvas(cx, cy);
     // 限制在房间边界内
-    const newX = Math.max(0, Math.min(x, ROOM_POLYGON[2][0]));
-    const newY = Math.max(0, Math.min(y, ROOM_POLYGON[2][1]));
+    const newX = Math.max(ROOM_POLYGON[0][0], Math.min(x, ROOM_POLYGON[2][0]));
+    const newY = Math.max(ROOM_POLYGON[0][1], Math.min(y, ROOM_POLYGON[2][1]));
     setTileConfig(prev => ({ ...prev, startX: newX, startY: newY }));
   };
 
@@ -173,34 +206,39 @@ const LayoutPreview: React.FC = () => {
             <span className="logo"><Logo /></span>
           </Space>
           <Space>
+            <Button icon={<RefreshOutlined />} onClick={loadLayout} type="primary">重新计算</Button>
             <Button icon={<PrinterOutlined />} onClick={handleExportCutting}>加工单</Button>
-            <button className="btn btn-accent" onClick={handleExportPdf} style={{ cursor: 'pointer' }}><DownloadOutlined /> 导出 PDF</button>
+            <button className="btn btn-primary" onClick={handleExportPdf} style={{ cursor: 'pointer' }}><DownloadOutlined /> 导出 PDF</button>
           </Space>
         </div>
 
         {error && (
-          <Alert message="排版计算失败" description={error} type="warning" showIcon style={{ marginBottom: 16 }}
-            action={<Button size="small" onClick={loadLayout}>重试</Button>} />
+          <Alert 
+            message="排版计算失败" 
+            description={error} 
+            type="warning" 
+            showIcon 
+            style={{ marginBottom: 16 }}
+            action={<Button size="small" onClick={loadLayout}>重试</Button>} 
+          />
         )}
 
         <div className="layout-grid-2">
           <Card 
             title={<span>📐 排版效果图</span>} 
             style={{ borderRadius: 8 }}
-            extra={
-              <Space size="small">
-                <Button size="small" type="primary" onClick={loadLayout}>重新计算</Button>
-              </Space>
-            }
           >
             <div 
               ref={canvasRef}
               className="layout-canvas" 
               style={{ 
-                width: 800, height: 520, position: 'relative', 
+                width: 800, 
+                height: 520, 
+                position: 'relative', 
                 cursor: isDragging ? 'grabbing' : 'default',
                 overflow: 'hidden',
                 userSelect: 'none',
+                background: '#f8fafc'
               }}
               onMouseDown={handleMouseDown}
               onMouseMove={handleMouseMove}
@@ -208,43 +246,56 @@ const LayoutPreview: React.FC = () => {
               onMouseLeave={handleMouseUp}
             >
               {/* 房间背景 */}
-              <div style={{
-                position: 'absolute',
-                left: offsetX,
-                top: offsetY,
-                width: (bounds.maxX - bounds.minX) * scale,
-                height: (bounds.maxY - bounds.minY) * scale,
-                background: 'rgba(26,54,93,0.05)',
-                border: '2px solid #1a365d',
-                borderRadius: 4,
-              }} />
-
-              {tiles.length > 0 ? tiles.map(t => {
-                const pos = toCanvas(t.x, t.y);
+              {(() => {
+                const topLeft = toCanvas(bounds.minX, bounds.minY);
+                const roomWidth = (bounds.maxX - bounds.minX) * scale;
+                const roomHeight = (bounds.maxY - bounds.minY) * scale;
                 return (
-                  <div key={String(t.id || Math.random())} style={{
+                  <div style={{
                     position: 'absolute',
-                    left: pos.x,
-                    top: pos.y,
-                    width: Math.max(t.width * scale - 1, 1),
-                    height: Math.max(t.height * scale - 1, 1),
-                    background: t.is_cut ? COLORS.cut : COLORS.whole,
-                    border: '1px solid rgba(255,255,255,0.3)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: Math.max(9, t.width * scale / 10),
-                    color: '#fff',
-                    fontWeight: 600,
-                    opacity: .9,
-                    borderRadius: 2,
-                  }}>
-                    {t.width * scale > 40 ? (t.is_cut ? '切' : '整') : ''}
+                    left: topLeft.x,
+                    top: topLeft.y,
+                    width: roomWidth,
+                    height: roomHeight,
+                    background: 'rgba(26,54,93,0.05)',
+                    border: '2px solid #1a365d',
+                    borderRadius: 4,
+                  }} />
+                );
+              })()}
+
+              {tiles.length > 0 ? tiles.map((tile) => {
+                const pos = toCanvas(tile.x, tile.y);
+                const w = tile.width * scale - 1;
+                const h = tile.height * scale - 1;
+                
+                return (
+                  <div 
+                    key={tile.id}
+                    style={{
+                      position: 'absolute',
+                      left: pos.x,
+                      top: pos.y,
+                      width: Math.max(w, 1),
+                      height: Math.max(h, 1),
+                      background: tile.is_cut ? COLORS.cut : COLORS.whole,
+                      border: '1px solid rgba(255,255,255,0.3)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: Math.max(9, w / 20),
+                      color: '#fff',
+                      fontWeight: 600,
+                      opacity: 0.9,
+                      borderRadius: 2,
+                    }}
+                  >
+                    {w > 40 ? (tile.is_cut ? '切' : '整') : ''}
                   </div>
                 );
               }) : (
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#94a3b8' }}>
-                  {error ? '计算失败，请确保后端服务运行' : '暂无排版数据'}
+                  {error ? '计算失败，请检查后端服务' : '暂无排版数据，请先绘制房间'}
                 </div>
               )}
 
@@ -262,18 +313,18 @@ const LayoutPreview: React.FC = () => {
               >
                 {/* 十字准星 */}
                 <svg width="24" height="24" viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="8" fill="none" stroke="#d4a574" strokeWidth="2"/>
-                  <line x1="12" y1="2" x2="12" y2="22" stroke="#d4a574" strokeWidth="2"/>
-                  <line x1="2" y1="12" x2="22" y2="12" stroke="#d4a574" strokeWidth="2"/>
-                  <circle cx="12" cy="12" r="3" fill="#d4a574"/>
+                  <circle cx="12" cy="12" r="8" fill="none" stroke="#d4a574" strokeWidth="2" />
+                  <line x1="12" y1="2" x2="12" y2="22" stroke="#d4a574" strokeWidth="2" />
+                  <line x1="2" y1="12" x2="22" y2="12" stroke="#d4a574" strokeWidth="2" />
+                  <circle cx="12" cy="12" r="3" fill="#d4a574" />
                 </svg>
               </div>
 
               {/* 提示 */}
               <div style={{
                 position: 'absolute',
-                bottom: 8,
-                left: 8,
+                bottom: 10,
+                left: 10,
                 background: 'rgba(212,165,116,0.9)',
                 color: '#1a365d',
                 padding: '6px 12px',
@@ -307,13 +358,15 @@ const LayoutPreview: React.FC = () => {
                     min={100} max={3000}
                     value={tileConfig.tileWidth}
                     onChange={(v) => setTileConfig(p => ({ ...p, tileWidth: v || 800 }))}
-                    style={{ width: 90 }} addonAfter="mm" />
+                    style={{ width: 90 }} addonAfter="mm"
+                  />
                   <span>×</span>
                   <InputNumber
                     min={100} max={3000}
                     value={tileConfig.tileHeight}
                     onChange={(v) => setTileConfig(p => ({ ...p, tileHeight: v || 800 }))}
-                    style={{ width: 90 }} addonAfter="mm" />
+                    style={{ width: 90 }} addonAfter="mm"
+                  />
                 </div>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                   <Text style={{ fontSize: 13, width: 80 }}>留缝宽度:</Text>
@@ -332,7 +385,7 @@ const LayoutPreview: React.FC = () => {
                   <Text style={{ fontSize: 13, width: 80 }}>铺贴方向:</Text>
                   <Select
                     value={tileConfig.direction}
-                    onChange={(v) => setTileConfig(p => ({ ...p, direction: v }))}
+                    onChange={(v: any) => setTileConfig(p => ({ ...p, direction: v }))}
                     style={{ width: 150 }}
                   >
                     <Option value="horizontal">⬌ 横向</Option>
@@ -361,7 +414,7 @@ const LayoutPreview: React.FC = () => {
                 <div style={{ fontWeight: 600, marginBottom: 8 }}>💡 操作说明</div>
                 <div>• 📍 拖拽金色十字 → 调整起铺点</div>
                 <div>• ⚙️ 修改瓷砖参数 → 点击重新计算</div>
-                <div>• 💾 可保存项目→导出确认单</div>
+                <div>• 💾 保存项目→ 导出确认单</div>
               </div>
             </Card>
           </div>
