@@ -296,3 +296,9403 @@ def calculate_tile_layout(
     if optimize:
         return engine.optimize_layout()
     return engine.calculate_layout()
+"""
+瓷砖排版核心计算"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y:"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h:"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon:"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < ("""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(p"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float ="""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v["""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        #"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.r"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self."""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(t"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            #"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts)"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self, start_x: float, start_y: float) -> Dict[str, Any]:
+        """"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self, start_x: float, start_y: float) -> Dict[str, Any]:
+        """从指定起铺点计算排版"""
+        tiles: List[Dict] = []
+"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self, start_x: float, start_y: float) -> Dict[str, Any]:
+        """从指定起铺点计算排版"""
+        tiles: List[Dict] = []
+        tile_id = 1
+        tile_w_gap = self.tile_w + self.gap"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self, start_x: float, start_y: float) -> Dict[str, Any]:
+        """从指定起铺点计算排版"""
+        tiles: List[Dict] = []
+        tile_id = 1
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+
+        # 计算"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self, start_x: float, start_y: float) -> Dict[str, Any]:
+        """从指定起铺点计算排版"""
+        tiles: List[Dict] = []
+        tile_id = 1
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+
+        # 计算网格范围，确保覆盖整个房间
+        min_grid_x = math.floor((self.rx_min"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self, start_x: float, start_y: float) -> Dict[str, Any]:
+        """从指定起铺点计算排版"""
+        tiles: List[Dict] = []
+        tile_id = 1
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+
+        # 计算网格范围，确保覆盖整个房间
+        min_grid_x = math.floor((self.rx_min - start_x) / tile_w_gap) - 5
+        max_grid_x = math"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self, start_x: float, start_y: float) -> Dict[str, Any]:
+        """从指定起铺点计算排版"""
+        tiles: List[Dict] = []
+        tile_id = 1
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+
+        # 计算网格范围，确保覆盖整个房间
+        min_grid_x = math.floor((self.rx_min - start_x) / tile_w_gap) - 5
+        max_grid_x = math.ceil((self.rx_max - start_x) / tile_w_gap) + 5"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self, start_x: float, start_y: float) -> Dict[str, Any]:
+        """从指定起铺点计算排版"""
+        tiles: List[Dict] = []
+        tile_id = 1
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+
+        # 计算网格范围，确保覆盖整个房间
+        min_grid_x = math.floor((self.rx_min - start_x) / tile_w_gap) - 5
+        max_grid_x = math.ceil((self.rx_max - start_x) / tile_w_gap) + 5
+        min_grid_y = math.floor((self.ry_min - start_y) / tile_h"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self, start_x: float, start_y: float) -> Dict[str, Any]:
+        """从指定起铺点计算排版"""
+        tiles: List[Dict] = []
+        tile_id = 1
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+
+        # 计算网格范围，确保覆盖整个房间
+        min_grid_x = math.floor((self.rx_min - start_x) / tile_w_gap) - 5
+        max_grid_x = math.ceil((self.rx_max - start_x) / tile_w_gap) + 5
+        min_grid_y = math.floor((self.ry_min - start_y) / tile_h_gap) - 5
+        max_grid_y = math.ceil((self.ry_max"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self, start_x: float, start_y: float) -> Dict[str, Any]:
+        """从指定起铺点计算排版"""
+        tiles: List[Dict] = []
+        tile_id = 1
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+
+        # 计算网格范围，确保覆盖整个房间
+        min_grid_x = math.floor((self.rx_min - start_x) / tile_w_gap) - 5
+        max_grid_x = math.ceil((self.rx_max - start_x) / tile_w_gap) + 5
+        min_grid_y = math.floor((self.ry_min - start_y) / tile_h_gap) - 5
+        max_grid_y = math.ceil((self.ry_max - start_y) / tile_h_gap) + 5
+
+        for grid_y in range"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self, start_x: float, start_y: float) -> Dict[str, Any]:
+        """从指定起铺点计算排版"""
+        tiles: List[Dict] = []
+        tile_id = 1
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+
+        # 计算网格范围，确保覆盖整个房间
+        min_grid_x = math.floor((self.rx_min - start_x) / tile_w_gap) - 5
+        max_grid_x = math.ceil((self.rx_max - start_x) / tile_w_gap) + 5
+        min_grid_y = math.floor((self.ry_min - start_y) / tile_h_gap) - 5
+        max_grid_y = math.ceil((self.ry_max - start_y) / tile_h_gap) + 5
+
+        for grid_y in range(min_grid_y, max_grid_y):
+            for grid_x in range(min_grid_x, max"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self, start_x: float, start_y: float) -> Dict[str, Any]:
+        """从指定起铺点计算排版"""
+        tiles: List[Dict] = []
+        tile_id = 1
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+
+        # 计算网格范围，确保覆盖整个房间
+        min_grid_x = math.floor((self.rx_min - start_x) / tile_w_gap) - 5
+        max_grid_x = math.ceil((self.rx_max - start_x) / tile_w_gap) + 5
+        min_grid_y = math.floor((self.ry_min - start_y) / tile_h_gap) - 5
+        max_grid_y = math.ceil((self.ry_max - start_y) / tile_h_gap) + 5
+
+        for grid_y in range(min_grid_y, max_grid_y):
+            for grid_x in range(min_grid_x, max_grid_x):
+                x = start_x + grid_x * tile_w_gap
+                y"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self, start_x: float, start_y: float) -> Dict[str, Any]:
+        """从指定起铺点计算排版"""
+        tiles: List[Dict] = []
+        tile_id = 1
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+
+        # 计算网格范围，确保覆盖整个房间
+        min_grid_x = math.floor((self.rx_min - start_x) / tile_w_gap) - 5
+        max_grid_x = math.ceil((self.rx_max - start_x) / tile_w_gap) + 5
+        min_grid_y = math.floor((self.ry_min - start_y) / tile_h_gap) - 5
+        max_grid_y = math.ceil((self.ry_max - start_y) / tile_h_gap) + 5
+
+        for grid_y in range(min_grid_y, max_grid_y):
+            for grid_x in range(min_grid_x, max_grid_x):
+                x = start_x + grid_x * tile_w_gap
+                y = start_y + grid_y * tile_h_gap
+                
+                used, area = self._tile"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self, start_x: float, start_y: float) -> Dict[str, Any]:
+        """从指定起铺点计算排版"""
+        tiles: List[Dict] = []
+        tile_id = 1
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+
+        # 计算网格范围，确保覆盖整个房间
+        min_grid_x = math.floor((self.rx_min - start_x) / tile_w_gap) - 5
+        max_grid_x = math.ceil((self.rx_max - start_x) / tile_w_gap) + 5
+        min_grid_y = math.floor((self.ry_min - start_y) / tile_h_gap) - 5
+        max_grid_y = math.ceil((self.ry_max - start_y) / tile_h_gap) + 5
+
+        for grid_y in range(min_grid_y, max_grid_y):
+            for grid_x in range(min_grid_x, max_grid_x):
+                x = start_x + grid_x * tile_w_gap
+                y = start_y + grid_y * tile_h_gap
+                
+                used, area = self._tile_coverage(x, y)
+                if used:
+                    # 简单判断是否是切割"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self, start_x: float, start_y: float) -> Dict[str, Any]:
+        """从指定起铺点计算排版"""
+        tiles: List[Dict] = []
+        tile_id = 1
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+
+        # 计算网格范围，确保覆盖整个房间
+        min_grid_x = math.floor((self.rx_min - start_x) / tile_w_gap) - 5
+        max_grid_x = math.ceil((self.rx_max - start_x) / tile_w_gap) + 5
+        min_grid_y = math.floor((self.ry_min - start_y) / tile_h_gap) - 5
+        max_grid_y = math.ceil((self.ry_max - start_y) / tile_h_gap) + 5
+
+        for grid_y in range(min_grid_y, max_grid_y):
+            for grid_x in range(min_grid_x, max_grid_x):
+                x = start_x + grid_x * tile_w_gap
+                y = start_y + grid_y * tile_h_gap
+                
+                used, area = self._tile_coverage(x, y)
+                if used:
+                    # 简单判断是否是切割砖
+                    corners = Rect(x, y, self.tile_w, self.tile_h)."""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self, start_x: float, start_y: float) -> Dict[str, Any]:
+        """从指定起铺点计算排版"""
+        tiles: List[Dict] = []
+        tile_id = 1
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+
+        # 计算网格范围，确保覆盖整个房间
+        min_grid_x = math.floor((self.rx_min - start_x) / tile_w_gap) - 5
+        max_grid_x = math.ceil((self.rx_max - start_x) / tile_w_gap) + 5
+        min_grid_y = math.floor((self.ry_min - start_y) / tile_h_gap) - 5
+        max_grid_y = math.ceil((self.ry_max - start_y) / tile_h_gap) + 5
+
+        for grid_y in range(min_grid_y, max_grid_y):
+            for grid_x in range(min_grid_x, max_grid_x):
+                x = start_x + grid_x * tile_w_gap
+                y = start_y + grid_y * tile_h_gap
+                
+                used, area = self._tile_coverage(x, y)
+                if used:
+                    # 简单判断是否是切割砖
+                    corners = Rect(x, y, self.tile_w, self.tile_h).corners()
+                    all_inside = all(point_in_polygon(c, self.room_"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self, start_x: float, start_y: float) -> Dict[str, Any]:
+        """从指定起铺点计算排版"""
+        tiles: List[Dict] = []
+        tile_id = 1
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+
+        # 计算网格范围，确保覆盖整个房间
+        min_grid_x = math.floor((self.rx_min - start_x) / tile_w_gap) - 5
+        max_grid_x = math.ceil((self.rx_max - start_x) / tile_w_gap) + 5
+        min_grid_y = math.floor((self.ry_min - start_y) / tile_h_gap) - 5
+        max_grid_y = math.ceil((self.ry_max - start_y) / tile_h_gap) + 5
+
+        for grid_y in range(min_grid_y, max_grid_y):
+            for grid_x in range(min_grid_x, max_grid_x):
+                x = start_x + grid_x * tile_w_gap
+                y = start_y + grid_y * tile_h_gap
+                
+                used, area = self._tile_coverage(x, y)
+                if used:
+                    # 简单判断是否是切割砖
+                    corners = Rect(x, y, self.tile_w, self.tile_h).corners()
+                    all_inside = all(point_in_polygon(c, self.room_pts) for c in corners)
+                    
+                    tiles.append({
+                        "id": tile_id"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self, start_x: float, start_y: float) -> Dict[str, Any]:
+        """从指定起铺点计算排版"""
+        tiles: List[Dict] = []
+        tile_id = 1
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+
+        # 计算网格范围，确保覆盖整个房间
+        min_grid_x = math.floor((self.rx_min - start_x) / tile_w_gap) - 5
+        max_grid_x = math.ceil((self.rx_max - start_x) / tile_w_gap) + 5
+        min_grid_y = math.floor((self.ry_min - start_y) / tile_h_gap) - 5
+        max_grid_y = math.ceil((self.ry_max - start_y) / tile_h_gap) + 5
+
+        for grid_y in range(min_grid_y, max_grid_y):
+            for grid_x in range(min_grid_x, max_grid_x):
+                x = start_x + grid_x * tile_w_gap
+                y = start_y + grid_y * tile_h_gap
+                
+                used, area = self._tile_coverage(x, y)
+                if used:
+                    # 简单判断是否是切割砖
+                    corners = Rect(x, y, self.tile_w, self.tile_h).corners()
+                    all_inside = all(point_in_polygon(c, self.room_pts) for c in corners)
+                    
+                    tiles.append({
+                        "id": tile_id,
+                        "x": round(x, 2),
+                        "y": round(y,"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self, start_x: float, start_y: float) -> Dict[str, Any]:
+        """从指定起铺点计算排版"""
+        tiles: List[Dict] = []
+        tile_id = 1
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+
+        # 计算网格范围，确保覆盖整个房间
+        min_grid_x = math.floor((self.rx_min - start_x) / tile_w_gap) - 5
+        max_grid_x = math.ceil((self.rx_max - start_x) / tile_w_gap) + 5
+        min_grid_y = math.floor((self.ry_min - start_y) / tile_h_gap) - 5
+        max_grid_y = math.ceil((self.ry_max - start_y) / tile_h_gap) + 5
+
+        for grid_y in range(min_grid_y, max_grid_y):
+            for grid_x in range(min_grid_x, max_grid_x):
+                x = start_x + grid_x * tile_w_gap
+                y = start_y + grid_y * tile_h_gap
+                
+                used, area = self._tile_coverage(x, y)
+                if used:
+                    # 简单判断是否是切割砖
+                    corners = Rect(x, y, self.tile_w, self.tile_h).corners()
+                    all_inside = all(point_in_polygon(c, self.room_pts) for c in corners)
+                    
+                    tiles.append({
+                        "id": tile_id,
+                        "x": round(x, 2),
+                        "y": round(y, 2),
+                        "width": self.tile_w,
+                        "height": self.t"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self, start_x: float, start_y: float) -> Dict[str, Any]:
+        """从指定起铺点计算排版"""
+        tiles: List[Dict] = []
+        tile_id = 1
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+
+        # 计算网格范围，确保覆盖整个房间
+        min_grid_x = math.floor((self.rx_min - start_x) / tile_w_gap) - 5
+        max_grid_x = math.ceil((self.rx_max - start_x) / tile_w_gap) + 5
+        min_grid_y = math.floor((self.ry_min - start_y) / tile_h_gap) - 5
+        max_grid_y = math.ceil((self.ry_max - start_y) / tile_h_gap) + 5
+
+        for grid_y in range(min_grid_y, max_grid_y):
+            for grid_x in range(min_grid_x, max_grid_x):
+                x = start_x + grid_x * tile_w_gap
+                y = start_y + grid_y * tile_h_gap
+                
+                used, area = self._tile_coverage(x, y)
+                if used:
+                    # 简单判断是否是切割砖
+                    corners = Rect(x, y, self.tile_w, self.tile_h).corners()
+                    all_inside = all(point_in_polygon(c, self.room_pts) for c in corners)
+                    
+                    tiles.append({
+                        "id": tile_id,
+                        "x": round(x, 2),
+                        "y": round(y, 2),
+                        "width": self.tile_w,
+                        "height": self.tile_h,
+                        "is_cut": not all_inside,
+                    })
+"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self, start_x: float, start_y: float) -> Dict[str, Any]:
+        """从指定起铺点计算排版"""
+        tiles: List[Dict] = []
+        tile_id = 1
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+
+        # 计算网格范围，确保覆盖整个房间
+        min_grid_x = math.floor((self.rx_min - start_x) / tile_w_gap) - 5
+        max_grid_x = math.ceil((self.rx_max - start_x) / tile_w_gap) + 5
+        min_grid_y = math.floor((self.ry_min - start_y) / tile_h_gap) - 5
+        max_grid_y = math.ceil((self.ry_max - start_y) / tile_h_gap) + 5
+
+        for grid_y in range(min_grid_y, max_grid_y):
+            for grid_x in range(min_grid_x, max_grid_x):
+                x = start_x + grid_x * tile_w_gap
+                y = start_y + grid_y * tile_h_gap
+                
+                used, area = self._tile_coverage(x, y)
+                if used:
+                    # 简单判断是否是切割砖
+                    corners = Rect(x, y, self.tile_w, self.tile_h).corners()
+                    all_inside = all(point_in_polygon(c, self.room_pts) for c in corners)
+                    
+                    tiles.append({
+                        "id": tile_id,
+                        "x": round(x, 2),
+                        "y": round(y, 2),
+                        "width": self.tile_w,
+                        "height": self.tile_h,
+                        "is_cut": not all_inside,
+                    })
+                    tile_id += 1
+
+        return self._package_result(tiles, start_x, start_y"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self, start_x: float, start_y: float) -> Dict[str, Any]:
+        """从指定起铺点计算排版"""
+        tiles: List[Dict] = []
+        tile_id = 1
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+
+        # 计算网格范围，确保覆盖整个房间
+        min_grid_x = math.floor((self.rx_min - start_x) / tile_w_gap) - 5
+        max_grid_x = math.ceil((self.rx_max - start_x) / tile_w_gap) + 5
+        min_grid_y = math.floor((self.ry_min - start_y) / tile_h_gap) - 5
+        max_grid_y = math.ceil((self.ry_max - start_y) / tile_h_gap) + 5
+
+        for grid_y in range(min_grid_y, max_grid_y):
+            for grid_x in range(min_grid_x, max_grid_x):
+                x = start_x + grid_x * tile_w_gap
+                y = start_y + grid_y * tile_h_gap
+                
+                used, area = self._tile_coverage(x, y)
+                if used:
+                    # 简单判断是否是切割砖
+                    corners = Rect(x, y, self.tile_w, self.tile_h).corners()
+                    all_inside = all(point_in_polygon(c, self.room_pts) for c in corners)
+                    
+                    tiles.append({
+                        "id": tile_id,
+                        "x": round(x, 2),
+                        "y": round(y, 2),
+                        "width": self.tile_w,
+                        "height": self.tile_h,
+                        "is_cut": not all_inside,
+                    })
+                    tile_id += 1
+
+        return self._package_result(tiles, start_x, start_y)
+
+    def calculate_aligned_to_door(
+        self,
+        door_edge:"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self, start_x: float, start_y: float) -> Dict[str, Any]:
+        """从指定起铺点计算排版"""
+        tiles: List[Dict] = []
+        tile_id = 1
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+
+        # 计算网格范围，确保覆盖整个房间
+        min_grid_x = math.floor((self.rx_min - start_x) / tile_w_gap) - 5
+        max_grid_x = math.ceil((self.rx_max - start_x) / tile_w_gap) + 5
+        min_grid_y = math.floor((self.ry_min - start_y) / tile_h_gap) - 5
+        max_grid_y = math.ceil((self.ry_max - start_y) / tile_h_gap) + 5
+
+        for grid_y in range(min_grid_y, max_grid_y):
+            for grid_x in range(min_grid_x, max_grid_x):
+                x = start_x + grid_x * tile_w_gap
+                y = start_y + grid_y * tile_h_gap
+                
+                used, area = self._tile_coverage(x, y)
+                if used:
+                    # 简单判断是否是切割砖
+                    corners = Rect(x, y, self.tile_w, self.tile_h).corners()
+                    all_inside = all(point_in_polygon(c, self.room_pts) for c in corners)
+                    
+                    tiles.append({
+                        "id": tile_id,
+                        "x": round(x, 2),
+                        "y": round(y, 2),
+                        "width": self.tile_w,
+                        "height": self.tile_h,
+                        "is_cut": not all_inside,
+                    })
+                    tile_id += 1
+
+        return self._package_result(tiles, start_x, start_y)
+
+    def calculate_aligned_to_door(
+        self,
+        door_edge: Tuple[int, int],  # 门的边索引
+        door_position_ratio: float ="""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self, start_x: float, start_y: float) -> Dict[str, Any]:
+        """从指定起铺点计算排版"""
+        tiles: List[Dict] = []
+        tile_id = 1
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+
+        # 计算网格范围，确保覆盖整个房间
+        min_grid_x = math.floor((self.rx_min - start_x) / tile_w_gap) - 5
+        max_grid_x = math.ceil((self.rx_max - start_x) / tile_w_gap) + 5
+        min_grid_y = math.floor((self.ry_min - start_y) / tile_h_gap) - 5
+        max_grid_y = math.ceil((self.ry_max - start_y) / tile_h_gap) + 5
+
+        for grid_y in range(min_grid_y, max_grid_y):
+            for grid_x in range(min_grid_x, max_grid_x):
+                x = start_x + grid_x * tile_w_gap
+                y = start_y + grid_y * tile_h_gap
+                
+                used, area = self._tile_coverage(x, y)
+                if used:
+                    # 简单判断是否是切割砖
+                    corners = Rect(x, y, self.tile_w, self.tile_h).corners()
+                    all_inside = all(point_in_polygon(c, self.room_pts) for c in corners)
+                    
+                    tiles.append({
+                        "id": tile_id,
+                        "x": round(x, 2),
+                        "y": round(y, 2),
+                        "width": self.tile_w,
+                        "height": self.tile_h,
+                        "is_cut": not all_inside,
+                    })
+                    tile_id += 1
+
+        return self._package_result(tiles, start_x, start_y)
+
+    def calculate_aligned_to_door(
+        self,
+        door_edge: Tuple[int, int],  # 门的边索引
+        door_position_ratio: float = 0.5,  # 门在边上的位置比例
+        align_gap:"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self, start_x: float, start_y: float) -> Dict[str, Any]:
+        """从指定起铺点计算排版"""
+        tiles: List[Dict] = []
+        tile_id = 1
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+
+        # 计算网格范围，确保覆盖整个房间
+        min_grid_x = math.floor((self.rx_min - start_x) / tile_w_gap) - 5
+        max_grid_x = math.ceil((self.rx_max - start_x) / tile_w_gap) + 5
+        min_grid_y = math.floor((self.ry_min - start_y) / tile_h_gap) - 5
+        max_grid_y = math.ceil((self.ry_max - start_y) / tile_h_gap) + 5
+
+        for grid_y in range(min_grid_y, max_grid_y):
+            for grid_x in range(min_grid_x, max_grid_x):
+                x = start_x + grid_x * tile_w_gap
+                y = start_y + grid_y * tile_h_gap
+                
+                used, area = self._tile_coverage(x, y)
+                if used:
+                    # 简单判断是否是切割砖
+                    corners = Rect(x, y, self.tile_w, self.tile_h).corners()
+                    all_inside = all(point_in_polygon(c, self.room_pts) for c in corners)
+                    
+                    tiles.append({
+                        "id": tile_id,
+                        "x": round(x, 2),
+                        "y": round(y, 2),
+                        "width": self.tile_w,
+                        "height": self.tile_h,
+                        "is_cut": not all_inside,
+                    })
+                    tile_id += 1
+
+        return self._package_result(tiles, start_x, start_y)
+
+    def calculate_aligned_to_door(
+        self,
+        door_edge: Tuple[int, int],  # 门的边索引
+        door_position_ratio: float = 0.5,  # 门在边上的位置比例
+        align_gap: bool = True,  # True=缝对齐, False=砖中对齐
+    ) ->"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self, start_x: float, start_y: float) -> Dict[str, Any]:
+        """从指定起铺点计算排版"""
+        tiles: List[Dict] = []
+        tile_id = 1
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+
+        # 计算网格范围，确保覆盖整个房间
+        min_grid_x = math.floor((self.rx_min - start_x) / tile_w_gap) - 5
+        max_grid_x = math.ceil((self.rx_max - start_x) / tile_w_gap) + 5
+        min_grid_y = math.floor((self.ry_min - start_y) / tile_h_gap) - 5
+        max_grid_y = math.ceil((self.ry_max - start_y) / tile_h_gap) + 5
+
+        for grid_y in range(min_grid_y, max_grid_y):
+            for grid_x in range(min_grid_x, max_grid_x):
+                x = start_x + grid_x * tile_w_gap
+                y = start_y + grid_y * tile_h_gap
+                
+                used, area = self._tile_coverage(x, y)
+                if used:
+                    # 简单判断是否是切割砖
+                    corners = Rect(x, y, self.tile_w, self.tile_h).corners()
+                    all_inside = all(point_in_polygon(c, self.room_pts) for c in corners)
+                    
+                    tiles.append({
+                        "id": tile_id,
+                        "x": round(x, 2),
+                        "y": round(y, 2),
+                        "width": self.tile_w,
+                        "height": self.tile_h,
+                        "is_cut": not all_inside,
+                    })
+                    tile_id += 1
+
+        return self._package_result(tiles, start_x, start_y)
+
+    def calculate_aligned_to_door(
+        self,
+        door_edge: Tuple[int, int],  # 门的边索引
+        door_position_ratio: float = 0.5,  # 门在边上的位置比例
+        align_gap: bool = True,  # True=缝对齐, False=砖中对齐
+    ) -> Dict[str, Any]:
+        """
+        核心功能：缝对齐门中
+        
+"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self, start_x: float, start_y: float) -> Dict[str, Any]:
+        """从指定起铺点计算排版"""
+        tiles: List[Dict] = []
+        tile_id = 1
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+
+        # 计算网格范围，确保覆盖整个房间
+        min_grid_x = math.floor((self.rx_min - start_x) / tile_w_gap) - 5
+        max_grid_x = math.ceil((self.rx_max - start_x) / tile_w_gap) + 5
+        min_grid_y = math.floor((self.ry_min - start_y) / tile_h_gap) - 5
+        max_grid_y = math.ceil((self.ry_max - start_y) / tile_h_gap) + 5
+
+        for grid_y in range(min_grid_y, max_grid_y):
+            for grid_x in range(min_grid_x, max_grid_x):
+                x = start_x + grid_x * tile_w_gap
+                y = start_y + grid_y * tile_h_gap
+                
+                used, area = self._tile_coverage(x, y)
+                if used:
+                    # 简单判断是否是切割砖
+                    corners = Rect(x, y, self.tile_w, self.tile_h).corners()
+                    all_inside = all(point_in_polygon(c, self.room_pts) for c in corners)
+                    
+                    tiles.append({
+                        "id": tile_id,
+                        "x": round(x, 2),
+                        "y": round(y, 2),
+                        "width": self.tile_w,
+                        "height": self.tile_h,
+                        "is_cut": not all_inside,
+                    })
+                    tile_id += 1
+
+        return self._package_result(tiles, start_x, start_y)
+
+    def calculate_aligned_to_door(
+        self,
+        door_edge: Tuple[int, int],  # 门的边索引
+        door_position_ratio: float = 0.5,  # 门在边上的位置比例
+        align_gap: bool = True,  # True=缝对齐, False=砖中对齐
+    ) -> Dict[str, Any]:
+        """
+        核心功能：缝对齐门中
+        
+        参数：
+            door_edge: 门所在的边 (p1_idx, p2_idx"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self, start_x: float, start_y: float) -> Dict[str, Any]:
+        """从指定起铺点计算排版"""
+        tiles: List[Dict] = []
+        tile_id = 1
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+
+        # 计算网格范围，确保覆盖整个房间
+        min_grid_x = math.floor((self.rx_min - start_x) / tile_w_gap) - 5
+        max_grid_x = math.ceil((self.rx_max - start_x) / tile_w_gap) + 5
+        min_grid_y = math.floor((self.ry_min - start_y) / tile_h_gap) - 5
+        max_grid_y = math.ceil((self.ry_max - start_y) / tile_h_gap) + 5
+
+        for grid_y in range(min_grid_y, max_grid_y):
+            for grid_x in range(min_grid_x, max_grid_x):
+                x = start_x + grid_x * tile_w_gap
+                y = start_y + grid_y * tile_h_gap
+                
+                used, area = self._tile_coverage(x, y)
+                if used:
+                    # 简单判断是否是切割砖
+                    corners = Rect(x, y, self.tile_w, self.tile_h).corners()
+                    all_inside = all(point_in_polygon(c, self.room_pts) for c in corners)
+                    
+                    tiles.append({
+                        "id": tile_id,
+                        "x": round(x, 2),
+                        "y": round(y, 2),
+                        "width": self.tile_w,
+                        "height": self.tile_h,
+                        "is_cut": not all_inside,
+                    })
+                    tile_id += 1
+
+        return self._package_result(tiles, start_x, start_y)
+
+    def calculate_aligned_to_door(
+        self,
+        door_edge: Tuple[int, int],  # 门的边索引
+        door_position_ratio: float = 0.5,  # 门在边上的位置比例
+        align_gap: bool = True,  # True=缝对齐, False=砖中对齐
+    ) -> Dict[str, Any]:
+        """
+        核心功能：缝对齐门中
+        
+        参数：
+            door_edge: 门所在的边 (p1_idx, p2_idx)
+            door_position_ratio: 门在边上的位置 (0-1)
+"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self, start_x: float, start_y: float) -> Dict[str, Any]:
+        """从指定起铺点计算排版"""
+        tiles: List[Dict] = []
+        tile_id = 1
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+
+        # 计算网格范围，确保覆盖整个房间
+        min_grid_x = math.floor((self.rx_min - start_x) / tile_w_gap) - 5
+        max_grid_x = math.ceil((self.rx_max - start_x) / tile_w_gap) + 5
+        min_grid_y = math.floor((self.ry_min - start_y) / tile_h_gap) - 5
+        max_grid_y = math.ceil((self.ry_max - start_y) / tile_h_gap) + 5
+
+        for grid_y in range(min_grid_y, max_grid_y):
+            for grid_x in range(min_grid_x, max_grid_x):
+                x = start_x + grid_x * tile_w_gap
+                y = start_y + grid_y * tile_h_gap
+                
+                used, area = self._tile_coverage(x, y)
+                if used:
+                    # 简单判断是否是切割砖
+                    corners = Rect(x, y, self.tile_w, self.tile_h).corners()
+                    all_inside = all(point_in_polygon(c, self.room_pts) for c in corners)
+                    
+                    tiles.append({
+                        "id": tile_id,
+                        "x": round(x, 2),
+                        "y": round(y, 2),
+                        "width": self.tile_w,
+                        "height": self.tile_h,
+                        "is_cut": not all_inside,
+                    })
+                    tile_id += 1
+
+        return self._package_result(tiles, start_x, start_y)
+
+    def calculate_aligned_to_door(
+        self,
+        door_edge: Tuple[int, int],  # 门的边索引
+        door_position_ratio: float = 0.5,  # 门在边上的位置比例
+        align_gap: bool = True,  # True=缝对齐, False=砖中对齐
+    ) -> Dict[str, Any]:
+        """
+        核心功能：缝对齐门中
+        
+        参数：
+            door_edge: 门所在的边 (p1_idx, p2_idx)
+            door_position_ratio: 门在边上的位置 (0-1)
+            align_gap: True=缝对齐门中线, False=砖中线对齐门中线
+"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self, start_x: float, start_y: float) -> Dict[str, Any]:
+        """从指定起铺点计算排版"""
+        tiles: List[Dict] = []
+        tile_id = 1
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+
+        # 计算网格范围，确保覆盖整个房间
+        min_grid_x = math.floor((self.rx_min - start_x) / tile_w_gap) - 5
+        max_grid_x = math.ceil((self.rx_max - start_x) / tile_w_gap) + 5
+        min_grid_y = math.floor((self.ry_min - start_y) / tile_h_gap) - 5
+        max_grid_y = math.ceil((self.ry_max - start_y) / tile_h_gap) + 5
+
+        for grid_y in range(min_grid_y, max_grid_y):
+            for grid_x in range(min_grid_x, max_grid_x):
+                x = start_x + grid_x * tile_w_gap
+                y = start_y + grid_y * tile_h_gap
+                
+                used, area = self._tile_coverage(x, y)
+                if used:
+                    # 简单判断是否是切割砖
+                    corners = Rect(x, y, self.tile_w, self.tile_h).corners()
+                    all_inside = all(point_in_polygon(c, self.room_pts) for c in corners)
+                    
+                    tiles.append({
+                        "id": tile_id,
+                        "x": round(x, 2),
+                        "y": round(y, 2),
+                        "width": self.tile_w,
+                        "height": self.tile_h,
+                        "is_cut": not all_inside,
+                    })
+                    tile_id += 1
+
+        return self._package_result(tiles, start_x, start_y)
+
+    def calculate_aligned_to_door(
+        self,
+        door_edge: Tuple[int, int],  # 门的边索引
+        door_position_ratio: float = 0.5,  # 门在边上的位置比例
+        align_gap: bool = True,  # True=缝对齐, False=砖中对齐
+    ) -> Dict[str, Any]:
+        """
+        核心功能：缝对齐门中
+        
+        参数：
+            door_edge: 门所在的边 (p1_idx, p2_idx)
+            door_position_ratio: 门在边上的位置 (0-1)
+            align_gap: True=缝对齐门中线, False=砖中线对齐门中线
+        """
+        p1 = self.room_pts[door_edge[0]]
+        p2"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self, start_x: float, start_y: float) -> Dict[str, Any]:
+        """从指定起铺点计算排版"""
+        tiles: List[Dict] = []
+        tile_id = 1
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+
+        # 计算网格范围，确保覆盖整个房间
+        min_grid_x = math.floor((self.rx_min - start_x) / tile_w_gap) - 5
+        max_grid_x = math.ceil((self.rx_max - start_x) / tile_w_gap) + 5
+        min_grid_y = math.floor((self.ry_min - start_y) / tile_h_gap) - 5
+        max_grid_y = math.ceil((self.ry_max - start_y) / tile_h_gap) + 5
+
+        for grid_y in range(min_grid_y, max_grid_y):
+            for grid_x in range(min_grid_x, max_grid_x):
+                x = start_x + grid_x * tile_w_gap
+                y = start_y + grid_y * tile_h_gap
+                
+                used, area = self._tile_coverage(x, y)
+                if used:
+                    # 简单判断是否是切割砖
+                    corners = Rect(x, y, self.tile_w, self.tile_h).corners()
+                    all_inside = all(point_in_polygon(c, self.room_pts) for c in corners)
+                    
+                    tiles.append({
+                        "id": tile_id,
+                        "x": round(x, 2),
+                        "y": round(y, 2),
+                        "width": self.tile_w,
+                        "height": self.tile_h,
+                        "is_cut": not all_inside,
+                    })
+                    tile_id += 1
+
+        return self._package_result(tiles, start_x, start_y)
+
+    def calculate_aligned_to_door(
+        self,
+        door_edge: Tuple[int, int],  # 门的边索引
+        door_position_ratio: float = 0.5,  # 门在边上的位置比例
+        align_gap: bool = True,  # True=缝对齐, False=砖中对齐
+    ) -> Dict[str, Any]:
+        """
+        核心功能：缝对齐门中
+        
+        参数：
+            door_edge: 门所在的边 (p1_idx, p2_idx)
+            door_position_ratio: 门在边上的位置 (0-1)
+            align_gap: True=缝对齐门中线, False=砖中线对齐门中线
+        """
+        p1 = self.room_pts[door_edge[0]]
+        p2 = self.room_pts[door_edge[1]]
+        
+        # 1. 计算门"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self, start_x: float, start_y: float) -> Dict[str, Any]:
+        """从指定起铺点计算排版"""
+        tiles: List[Dict] = []
+        tile_id = 1
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+
+        # 计算网格范围，确保覆盖整个房间
+        min_grid_x = math.floor((self.rx_min - start_x) / tile_w_gap) - 5
+        max_grid_x = math.ceil((self.rx_max - start_x) / tile_w_gap) + 5
+        min_grid_y = math.floor((self.ry_min - start_y) / tile_h_gap) - 5
+        max_grid_y = math.ceil((self.ry_max - start_y) / tile_h_gap) + 5
+
+        for grid_y in range(min_grid_y, max_grid_y):
+            for grid_x in range(min_grid_x, max_grid_x):
+                x = start_x + grid_x * tile_w_gap
+                y = start_y + grid_y * tile_h_gap
+                
+                used, area = self._tile_coverage(x, y)
+                if used:
+                    # 简单判断是否是切割砖
+                    corners = Rect(x, y, self.tile_w, self.tile_h).corners()
+                    all_inside = all(point_in_polygon(c, self.room_pts) for c in corners)
+                    
+                    tiles.append({
+                        "id": tile_id,
+                        "x": round(x, 2),
+                        "y": round(y, 2),
+                        "width": self.tile_w,
+                        "height": self.tile_h,
+                        "is_cut": not all_inside,
+                    })
+                    tile_id += 1
+
+        return self._package_result(tiles, start_x, start_y)
+
+    def calculate_aligned_to_door(
+        self,
+        door_edge: Tuple[int, int],  # 门的边索引
+        door_position_ratio: float = 0.5,  # 门在边上的位置比例
+        align_gap: bool = True,  # True=缝对齐, False=砖中对齐
+    ) -> Dict[str, Any]:
+        """
+        核心功能：缝对齐门中
+        
+        参数：
+            door_edge: 门所在的边 (p1_idx, p2_idx)
+            door_position_ratio: 门在边上的位置 (0-1)
+            align_gap: True=缝对齐门中线, False=砖中线对齐门中线
+        """
+        p1 = self.room_pts[door_edge[0]]
+        p2 = self.room_pts[door_edge[1]]
+        
+        # 1. 计算门中心点（根据比例）
+        door_center_x = p1.x + (p2.x -"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self, start_x: float, start_y: float) -> Dict[str, Any]:
+        """从指定起铺点计算排版"""
+        tiles: List[Dict] = []
+        tile_id = 1
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+
+        # 计算网格范围，确保覆盖整个房间
+        min_grid_x = math.floor((self.rx_min - start_x) / tile_w_gap) - 5
+        max_grid_x = math.ceil((self.rx_max - start_x) / tile_w_gap) + 5
+        min_grid_y = math.floor((self.ry_min - start_y) / tile_h_gap) - 5
+        max_grid_y = math.ceil((self.ry_max - start_y) / tile_h_gap) + 5
+
+        for grid_y in range(min_grid_y, max_grid_y):
+            for grid_x in range(min_grid_x, max_grid_x):
+                x = start_x + grid_x * tile_w_gap
+                y = start_y + grid_y * tile_h_gap
+                
+                used, area = self._tile_coverage(x, y)
+                if used:
+                    # 简单判断是否是切割砖
+                    corners = Rect(x, y, self.tile_w, self.tile_h).corners()
+                    all_inside = all(point_in_polygon(c, self.room_pts) for c in corners)
+                    
+                    tiles.append({
+                        "id": tile_id,
+                        "x": round(x, 2),
+                        "y": round(y, 2),
+                        "width": self.tile_w,
+                        "height": self.tile_h,
+                        "is_cut": not all_inside,
+                    })
+                    tile_id += 1
+
+        return self._package_result(tiles, start_x, start_y)
+
+    def calculate_aligned_to_door(
+        self,
+        door_edge: Tuple[int, int],  # 门的边索引
+        door_position_ratio: float = 0.5,  # 门在边上的位置比例
+        align_gap: bool = True,  # True=缝对齐, False=砖中对齐
+    ) -> Dict[str, Any]:
+        """
+        核心功能：缝对齐门中
+        
+        参数：
+            door_edge: 门所在的边 (p1_idx, p2_idx)
+            door_position_ratio: 门在边上的位置 (0-1)
+            align_gap: True=缝对齐门中线, False=砖中线对齐门中线
+        """
+        p1 = self.room_pts[door_edge[0]]
+        p2 = self.room_pts[door_edge[1]]
+        
+        # 1. 计算门中心点（根据比例）
+        door_center_x = p1.x + (p2.x - p1.x) * door_position_ratio
+        door_center_y = p1.y + (p"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self, start_x: float, start_y: float) -> Dict[str, Any]:
+        """从指定起铺点计算排版"""
+        tiles: List[Dict] = []
+        tile_id = 1
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+
+        # 计算网格范围，确保覆盖整个房间
+        min_grid_x = math.floor((self.rx_min - start_x) / tile_w_gap) - 5
+        max_grid_x = math.ceil((self.rx_max - start_x) / tile_w_gap) + 5
+        min_grid_y = math.floor((self.ry_min - start_y) / tile_h_gap) - 5
+        max_grid_y = math.ceil((self.ry_max - start_y) / tile_h_gap) + 5
+
+        for grid_y in range(min_grid_y, max_grid_y):
+            for grid_x in range(min_grid_x, max_grid_x):
+                x = start_x + grid_x * tile_w_gap
+                y = start_y + grid_y * tile_h_gap
+                
+                used, area = self._tile_coverage(x, y)
+                if used:
+                    # 简单判断是否是切割砖
+                    corners = Rect(x, y, self.tile_w, self.tile_h).corners()
+                    all_inside = all(point_in_polygon(c, self.room_pts) for c in corners)
+                    
+                    tiles.append({
+                        "id": tile_id,
+                        "x": round(x, 2),
+                        "y": round(y, 2),
+                        "width": self.tile_w,
+                        "height": self.tile_h,
+                        "is_cut": not all_inside,
+                    })
+                    tile_id += 1
+
+        return self._package_result(tiles, start_x, start_y)
+
+    def calculate_aligned_to_door(
+        self,
+        door_edge: Tuple[int, int],  # 门的边索引
+        door_position_ratio: float = 0.5,  # 门在边上的位置比例
+        align_gap: bool = True,  # True=缝对齐, False=砖中对齐
+    ) -> Dict[str, Any]:
+        """
+        核心功能：缝对齐门中
+        
+        参数：
+            door_edge: 门所在的边 (p1_idx, p2_idx)
+            door_position_ratio: 门在边上的位置 (0-1)
+            align_gap: True=缝对齐门中线, False=砖中线对齐门中线
+        """
+        p1 = self.room_pts[door_edge[0]]
+        p2 = self.room_pts[door_edge[1]]
+        
+        # 1. 计算门中心点（根据比例）
+        door_center_x = p1.x + (p2.x - p1.x) * door_position_ratio
+        door_center_y = p1.y + (p2.y - p1.y) * door_position_ratio
+        
+        # 2. 判断是横向"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self, start_x: float, start_y: float) -> Dict[str, Any]:
+        """从指定起铺点计算排版"""
+        tiles: List[Dict] = []
+        tile_id = 1
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+
+        # 计算网格范围，确保覆盖整个房间
+        min_grid_x = math.floor((self.rx_min - start_x) / tile_w_gap) - 5
+        max_grid_x = math.ceil((self.rx_max - start_x) / tile_w_gap) + 5
+        min_grid_y = math.floor((self.ry_min - start_y) / tile_h_gap) - 5
+        max_grid_y = math.ceil((self.ry_max - start_y) / tile_h_gap) + 5
+
+        for grid_y in range(min_grid_y, max_grid_y):
+            for grid_x in range(min_grid_x, max_grid_x):
+                x = start_x + grid_x * tile_w_gap
+                y = start_y + grid_y * tile_h_gap
+                
+                used, area = self._tile_coverage(x, y)
+                if used:
+                    # 简单判断是否是切割砖
+                    corners = Rect(x, y, self.tile_w, self.tile_h).corners()
+                    all_inside = all(point_in_polygon(c, self.room_pts) for c in corners)
+                    
+                    tiles.append({
+                        "id": tile_id,
+                        "x": round(x, 2),
+                        "y": round(y, 2),
+                        "width": self.tile_w,
+                        "height": self.tile_h,
+                        "is_cut": not all_inside,
+                    })
+                    tile_id += 1
+
+        return self._package_result(tiles, start_x, start_y)
+
+    def calculate_aligned_to_door(
+        self,
+        door_edge: Tuple[int, int],  # 门的边索引
+        door_position_ratio: float = 0.5,  # 门在边上的位置比例
+        align_gap: bool = True,  # True=缝对齐, False=砖中对齐
+    ) -> Dict[str, Any]:
+        """
+        核心功能：缝对齐门中
+        
+        参数：
+            door_edge: 门所在的边 (p1_idx, p2_idx)
+            door_position_ratio: 门在边上的位置 (0-1)
+            align_gap: True=缝对齐门中线, False=砖中线对齐门中线
+        """
+        p1 = self.room_pts[door_edge[0]]
+        p2 = self.room_pts[door_edge[1]]
+        
+        # 1. 计算门中心点（根据比例）
+        door_center_x = p1.x + (p2.x - p1.x) * door_position_ratio
+        door_center_y = p1.y + (p2.y - p1.y) * door_position_ratio
+        
+        # 2. 判断是横向边还是纵向边
+        edge_dx ="""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self, start_x: float, start_y: float) -> Dict[str, Any]:
+        """从指定起铺点计算排版"""
+        tiles: List[Dict] = []
+        tile_id = 1
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+
+        # 计算网格范围，确保覆盖整个房间
+        min_grid_x = math.floor((self.rx_min - start_x) / tile_w_gap) - 5
+        max_grid_x = math.ceil((self.rx_max - start_x) / tile_w_gap) + 5
+        min_grid_y = math.floor((self.ry_min - start_y) / tile_h_gap) - 5
+        max_grid_y = math.ceil((self.ry_max - start_y) / tile_h_gap) + 5
+
+        for grid_y in range(min_grid_y, max_grid_y):
+            for grid_x in range(min_grid_x, max_grid_x):
+                x = start_x + grid_x * tile_w_gap
+                y = start_y + grid_y * tile_h_gap
+                
+                used, area = self._tile_coverage(x, y)
+                if used:
+                    # 简单判断是否是切割砖
+                    corners = Rect(x, y, self.tile_w, self.tile_h).corners()
+                    all_inside = all(point_in_polygon(c, self.room_pts) for c in corners)
+                    
+                    tiles.append({
+                        "id": tile_id,
+                        "x": round(x, 2),
+                        "y": round(y, 2),
+                        "width": self.tile_w,
+                        "height": self.tile_h,
+                        "is_cut": not all_inside,
+                    })
+                    tile_id += 1
+
+        return self._package_result(tiles, start_x, start_y)
+
+    def calculate_aligned_to_door(
+        self,
+        door_edge: Tuple[int, int],  # 门的边索引
+        door_position_ratio: float = 0.5,  # 门在边上的位置比例
+        align_gap: bool = True,  # True=缝对齐, False=砖中对齐
+    ) -> Dict[str, Any]:
+        """
+        核心功能：缝对齐门中
+        
+        参数：
+            door_edge: 门所在的边 (p1_idx, p2_idx)
+            door_position_ratio: 门在边上的位置 (0-1)
+            align_gap: True=缝对齐门中线, False=砖中线对齐门中线
+        """
+        p1 = self.room_pts[door_edge[0]]
+        p2 = self.room_pts[door_edge[1]]
+        
+        # 1. 计算门中心点（根据比例）
+        door_center_x = p1.x + (p2.x - p1.x) * door_position_ratio
+        door_center_y = p1.y + (p2.y - p1.y) * door_position_ratio
+        
+        # 2. 判断是横向边还是纵向边
+        edge_dx = abs(p2.x - p1.x)
+"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self, start_x: float, start_y: float) -> Dict[str, Any]:
+        """从指定起铺点计算排版"""
+        tiles: List[Dict] = []
+        tile_id = 1
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+
+        # 计算网格范围，确保覆盖整个房间
+        min_grid_x = math.floor((self.rx_min - start_x) / tile_w_gap) - 5
+        max_grid_x = math.ceil((self.rx_max - start_x) / tile_w_gap) + 5
+        min_grid_y = math.floor((self.ry_min - start_y) / tile_h_gap) - 5
+        max_grid_y = math.ceil((self.ry_max - start_y) / tile_h_gap) + 5
+
+        for grid_y in range(min_grid_y, max_grid_y):
+            for grid_x in range(min_grid_x, max_grid_x):
+                x = start_x + grid_x * tile_w_gap
+                y = start_y + grid_y * tile_h_gap
+                
+                used, area = self._tile_coverage(x, y)
+                if used:
+                    # 简单判断是否是切割砖
+                    corners = Rect(x, y, self.tile_w, self.tile_h).corners()
+                    all_inside = all(point_in_polygon(c, self.room_pts) for c in corners)
+                    
+                    tiles.append({
+                        "id": tile_id,
+                        "x": round(x, 2),
+                        "y": round(y, 2),
+                        "width": self.tile_w,
+                        "height": self.tile_h,
+                        "is_cut": not all_inside,
+                    })
+                    tile_id += 1
+
+        return self._package_result(tiles, start_x, start_y)
+
+    def calculate_aligned_to_door(
+        self,
+        door_edge: Tuple[int, int],  # 门的边索引
+        door_position_ratio: float = 0.5,  # 门在边上的位置比例
+        align_gap: bool = True,  # True=缝对齐, False=砖中对齐
+    ) -> Dict[str, Any]:
+        """
+        核心功能：缝对齐门中
+        
+        参数：
+            door_edge: 门所在的边 (p1_idx, p2_idx)
+            door_position_ratio: 门在边上的位置 (0-1)
+            align_gap: True=缝对齐门中线, False=砖中线对齐门中线
+        """
+        p1 = self.room_pts[door_edge[0]]
+        p2 = self.room_pts[door_edge[1]]
+        
+        # 1. 计算门中心点（根据比例）
+        door_center_x = p1.x + (p2.x - p1.x) * door_position_ratio
+        door_center_y = p1.y + (p2.y - p1.y) * door_position_ratio
+        
+        # 2. 判断是横向边还是纵向边
+        edge_dx = abs(p2.x - p1.x)
+        edge_dy = abs(p2.y - p1.y)
+        is_horizontal_edge"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self, start_x: float, start_y: float) -> Dict[str, Any]:
+        """从指定起铺点计算排版"""
+        tiles: List[Dict] = []
+        tile_id = 1
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+
+        # 计算网格范围，确保覆盖整个房间
+        min_grid_x = math.floor((self.rx_min - start_x) / tile_w_gap) - 5
+        max_grid_x = math.ceil((self.rx_max - start_x) / tile_w_gap) + 5
+        min_grid_y = math.floor((self.ry_min - start_y) / tile_h_gap) - 5
+        max_grid_y = math.ceil((self.ry_max - start_y) / tile_h_gap) + 5
+
+        for grid_y in range(min_grid_y, max_grid_y):
+            for grid_x in range(min_grid_x, max_grid_x):
+                x = start_x + grid_x * tile_w_gap
+                y = start_y + grid_y * tile_h_gap
+                
+                used, area = self._tile_coverage(x, y)
+                if used:
+                    # 简单判断是否是切割砖
+                    corners = Rect(x, y, self.tile_w, self.tile_h).corners()
+                    all_inside = all(point_in_polygon(c, self.room_pts) for c in corners)
+                    
+                    tiles.append({
+                        "id": tile_id,
+                        "x": round(x, 2),
+                        "y": round(y, 2),
+                        "width": self.tile_w,
+                        "height": self.tile_h,
+                        "is_cut": not all_inside,
+                    })
+                    tile_id += 1
+
+        return self._package_result(tiles, start_x, start_y)
+
+    def calculate_aligned_to_door(
+        self,
+        door_edge: Tuple[int, int],  # 门的边索引
+        door_position_ratio: float = 0.5,  # 门在边上的位置比例
+        align_gap: bool = True,  # True=缝对齐, False=砖中对齐
+    ) -> Dict[str, Any]:
+        """
+        核心功能：缝对齐门中
+        
+        参数：
+            door_edge: 门所在的边 (p1_idx, p2_idx)
+            door_position_ratio: 门在边上的位置 (0-1)
+            align_gap: True=缝对齐门中线, False=砖中线对齐门中线
+        """
+        p1 = self.room_pts[door_edge[0]]
+        p2 = self.room_pts[door_edge[1]]
+        
+        # 1. 计算门中心点（根据比例）
+        door_center_x = p1.x + (p2.x - p1.x) * door_position_ratio
+        door_center_y = p1.y + (p2.y - p1.y) * door_position_ratio
+        
+        # 2. 判断是横向边还是纵向边
+        edge_dx = abs(p2.x - p1.x)
+        edge_dy = abs(p2.y - p1.y)
+        is_horizontal_edge = edge_dx > edge_dy
+        
+        tile_w_gap = self.tile_w +"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self, start_x: float, start_y: float) -> Dict[str, Any]:
+        """从指定起铺点计算排版"""
+        tiles: List[Dict] = []
+        tile_id = 1
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+
+        # 计算网格范围，确保覆盖整个房间
+        min_grid_x = math.floor((self.rx_min - start_x) / tile_w_gap) - 5
+        max_grid_x = math.ceil((self.rx_max - start_x) / tile_w_gap) + 5
+        min_grid_y = math.floor((self.ry_min - start_y) / tile_h_gap) - 5
+        max_grid_y = math.ceil((self.ry_max - start_y) / tile_h_gap) + 5
+
+        for grid_y in range(min_grid_y, max_grid_y):
+            for grid_x in range(min_grid_x, max_grid_x):
+                x = start_x + grid_x * tile_w_gap
+                y = start_y + grid_y * tile_h_gap
+                
+                used, area = self._tile_coverage(x, y)
+                if used:
+                    # 简单判断是否是切割砖
+                    corners = Rect(x, y, self.tile_w, self.tile_h).corners()
+                    all_inside = all(point_in_polygon(c, self.room_pts) for c in corners)
+                    
+                    tiles.append({
+                        "id": tile_id,
+                        "x": round(x, 2),
+                        "y": round(y, 2),
+                        "width": self.tile_w,
+                        "height": self.tile_h,
+                        "is_cut": not all_inside,
+                    })
+                    tile_id += 1
+
+        return self._package_result(tiles, start_x, start_y)
+
+    def calculate_aligned_to_door(
+        self,
+        door_edge: Tuple[int, int],  # 门的边索引
+        door_position_ratio: float = 0.5,  # 门在边上的位置比例
+        align_gap: bool = True,  # True=缝对齐, False=砖中对齐
+    ) -> Dict[str, Any]:
+        """
+        核心功能：缝对齐门中
+        
+        参数：
+            door_edge: 门所在的边 (p1_idx, p2_idx)
+            door_position_ratio: 门在边上的位置 (0-1)
+            align_gap: True=缝对齐门中线, False=砖中线对齐门中线
+        """
+        p1 = self.room_pts[door_edge[0]]
+        p2 = self.room_pts[door_edge[1]]
+        
+        # 1. 计算门中心点（根据比例）
+        door_center_x = p1.x + (p2.x - p1.x) * door_position_ratio
+        door_center_y = p1.y + (p2.y - p1.y) * door_position_ratio
+        
+        # 2. 判断是横向边还是纵向边
+        edge_dx = abs(p2.x - p1.x)
+        edge_dy = abs(p2.y - p1.y)
+        is_horizontal_edge = edge_dx > edge_dy
+        
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+        
+"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self, start_x: float, start_y: float) -> Dict[str, Any]:
+        """从指定起铺点计算排版"""
+        tiles: List[Dict] = []
+        tile_id = 1
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+
+        # 计算网格范围，确保覆盖整个房间
+        min_grid_x = math.floor((self.rx_min - start_x) / tile_w_gap) - 5
+        max_grid_x = math.ceil((self.rx_max - start_x) / tile_w_gap) + 5
+        min_grid_y = math.floor((self.ry_min - start_y) / tile_h_gap) - 5
+        max_grid_y = math.ceil((self.ry_max - start_y) / tile_h_gap) + 5
+
+        for grid_y in range(min_grid_y, max_grid_y):
+            for grid_x in range(min_grid_x, max_grid_x):
+                x = start_x + grid_x * tile_w_gap
+                y = start_y + grid_y * tile_h_gap
+                
+                used, area = self._tile_coverage(x, y)
+                if used:
+                    # 简单判断是否是切割砖
+                    corners = Rect(x, y, self.tile_w, self.tile_h).corners()
+                    all_inside = all(point_in_polygon(c, self.room_pts) for c in corners)
+                    
+                    tiles.append({
+                        "id": tile_id,
+                        "x": round(x, 2),
+                        "y": round(y, 2),
+                        "width": self.tile_w,
+                        "height": self.tile_h,
+                        "is_cut": not all_inside,
+                    })
+                    tile_id += 1
+
+        return self._package_result(tiles, start_x, start_y)
+
+    def calculate_aligned_to_door(
+        self,
+        door_edge: Tuple[int, int],  # 门的边索引
+        door_position_ratio: float = 0.5,  # 门在边上的位置比例
+        align_gap: bool = True,  # True=缝对齐, False=砖中对齐
+    ) -> Dict[str, Any]:
+        """
+        核心功能：缝对齐门中
+        
+        参数：
+            door_edge: 门所在的边 (p1_idx, p2_idx)
+            door_position_ratio: 门在边上的位置 (0-1)
+            align_gap: True=缝对齐门中线, False=砖中线对齐门中线
+        """
+        p1 = self.room_pts[door_edge[0]]
+        p2 = self.room_pts[door_edge[1]]
+        
+        # 1. 计算门中心点（根据比例）
+        door_center_x = p1.x + (p2.x - p1.x) * door_position_ratio
+        door_center_y = p1.y + (p2.y - p1.y) * door_position_ratio
+        
+        # 2. 判断是横向边还是纵向边
+        edge_dx = abs(p2.x - p1.x)
+        edge_dy = abs(p2.y - p1.y)
+        is_horizontal_edge = edge_dx > edge_dy
+        
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+        
+        # 3. 计算起铺点，让缝对齐门中心
+        if is_"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self, start_x: float, start_y: float) -> Dict[str, Any]:
+        """从指定起铺点计算排版"""
+        tiles: List[Dict] = []
+        tile_id = 1
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+
+        # 计算网格范围，确保覆盖整个房间
+        min_grid_x = math.floor((self.rx_min - start_x) / tile_w_gap) - 5
+        max_grid_x = math.ceil((self.rx_max - start_x) / tile_w_gap) + 5
+        min_grid_y = math.floor((self.ry_min - start_y) / tile_h_gap) - 5
+        max_grid_y = math.ceil((self.ry_max - start_y) / tile_h_gap) + 5
+
+        for grid_y in range(min_grid_y, max_grid_y):
+            for grid_x in range(min_grid_x, max_grid_x):
+                x = start_x + grid_x * tile_w_gap
+                y = start_y + grid_y * tile_h_gap
+                
+                used, area = self._tile_coverage(x, y)
+                if used:
+                    # 简单判断是否是切割砖
+                    corners = Rect(x, y, self.tile_w, self.tile_h).corners()
+                    all_inside = all(point_in_polygon(c, self.room_pts) for c in corners)
+                    
+                    tiles.append({
+                        "id": tile_id,
+                        "x": round(x, 2),
+                        "y": round(y, 2),
+                        "width": self.tile_w,
+                        "height": self.tile_h,
+                        "is_cut": not all_inside,
+                    })
+                    tile_id += 1
+
+        return self._package_result(tiles, start_x, start_y)
+
+    def calculate_aligned_to_door(
+        self,
+        door_edge: Tuple[int, int],  # 门的边索引
+        door_position_ratio: float = 0.5,  # 门在边上的位置比例
+        align_gap: bool = True,  # True=缝对齐, False=砖中对齐
+    ) -> Dict[str, Any]:
+        """
+        核心功能：缝对齐门中
+        
+        参数：
+            door_edge: 门所在的边 (p1_idx, p2_idx)
+            door_position_ratio: 门在边上的位置 (0-1)
+            align_gap: True=缝对齐门中线, False=砖中线对齐门中线
+        """
+        p1 = self.room_pts[door_edge[0]]
+        p2 = self.room_pts[door_edge[1]]
+        
+        # 1. 计算门中心点（根据比例）
+        door_center_x = p1.x + (p2.x - p1.x) * door_position_ratio
+        door_center_y = p1.y + (p2.y - p1.y) * door_position_ratio
+        
+        # 2. 判断是横向边还是纵向边
+        edge_dx = abs(p2.x - p1.x)
+        edge_dy = abs(p2.y - p1.y)
+        is_horizontal_edge = edge_dx > edge_dy
+        
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+        
+        # 3. 计算起铺点，让缝对齐门中心
+        if is_horizontal_edge:
+            # 横向边：在 Y 方向对齐
+            if align_g"""
+瓷砖排版核心计算引擎 —— 聚焦核心功能：
+1. 基础排版（起铺点）
+2. 缝对齐门中（核心功能）
+3. 损耗优化
+"""
+from typing import List, Dict, Any, Tuple, Optional
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class Point:
+    x: float
+    y: float
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+
+@dataclass
+class Rect:
+    x: float
+    y: float
+    w: float
+    h: float
+
+    def corners(self) -> List[Point]:
+        return [
+            Point(self.x, self.y),
+            Point(self.x + self.w, self.y),
+            Point(self.x + self.w, self.y + self.h),
+            Point(self.x, self.y + self.h),
+        ]
+
+
+def point_in_polygon(point: Point, polygon: List[Point]) -> bool:
+    """射线法判断点是否在多边形内"""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        pi, pj = polygon[i], polygon[j]
+        if ((pi.y > point.y) != (pj.y > point.y)) and (
+            point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def polygon_area(vertices: List[Point]) -> float:
+    """鞋带公式计算面积"""
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    return abs(area) / 2.0
+
+
+def polygon_bounds(polygon: List[Point]) -> Tuple[float, float, float, float]:
+    xs = [p.x for p in polygon]
+    ys = [p.y for p in polygon]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+class TileLayoutEngine:
+    """瓷砖排版核心引擎"""
+
+    def __init__(
+        self,
+        room_polygon: List[List[float]],
+        tile_width: float,
+        tile_height: float,
+        gap_width: float = 2,
+    ):
+        self.room_pts = [Point(v[0], v[1]) for v in room_polygon]
+        self.tile_w = tile_width
+        self.tile_h = tile_height
+        self.gap = gap_width
+
+        # 房间边界
+        self.rx_min, self.ry_min, self.rx_max, self.ry_max = polygon_bounds(self.room_pts)
+        self.room_width = self.rx_max - self.rx_min
+        self.room_height = self.ry_max - self.ry_min
+
+    def _tile_coverage(self, tile_x: float, tile_y: float) -> Tuple[bool, float]:
+        """
+        检查瓷砖是否覆盖房间
+        返回：(是否使用, 覆盖面积)
+        """
+        corners = Rect(tile_x, tile_y, self.tile_w, self.tile_h).corners()
+        center = Point(tile_x + self.tile_w / 2, tile_y + self.tile_h / 2)
+        
+        # 快速检查：中心是否在房间内
+        center_inside = point_in_polygon(center, self.room_pts)
+        
+        if not center_inside:
+            # 检查瓷砖任意角落是否在房间内
+            any_corner_inside = any(point_in_polygon(c, self.room_pts) for c in corners)
+            if not any_corner_inside:
+                return False, 0.0
+        
+        # 这里简化处理：只要瓷砖和房间有交集就保留
+        # 实际生产可以用 Sutherland-Hodgman 精确计算
+        return True, self.tile_w * self.tile_h
+
+    def calculate_from_start_point(self, start_x: float, start_y: float) -> Dict[str, Any]:
+        """从指定起铺点计算排版"""
+        tiles: List[Dict] = []
+        tile_id = 1
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+
+        # 计算网格范围，确保覆盖整个房间
+        min_grid_x = math.floor((self.rx_min - start_x) / tile_w_gap) - 5
+        max_grid_x = math.ceil((self.rx_max - start_x) / tile_w_gap) + 5
+        min_grid_y = math.floor((self.ry_min - start_y) / tile_h_gap) - 5
+        max_grid_y = math.ceil((self.ry_max - start_y) / tile_h_gap) + 5
+
+        for grid_y in range(min_grid_y, max_grid_y):
+            for grid_x in range(min_grid_x, max_grid_x):
+                x = start_x + grid_x * tile_w_gap
+                y = start_y + grid_y * tile_h_gap
+                
+                used, area = self._tile_coverage(x, y)
+                if used:
+                    # 简单判断是否是切割砖
+                    corners = Rect(x, y, self.tile_w, self.tile_h).corners()
+                    all_inside = all(point_in_polygon(c, self.room_pts) for c in corners)
+                    
+                    tiles.append({
+                        "id": tile_id,
+                        "x": round(x, 2),
+                        "y": round(y, 2),
+                        "width": self.tile_w,
+                        "height": self.tile_h,
+                        "is_cut": not all_inside,
+                    })
+                    tile_id += 1
+
+        return self._package_result(tiles, start_x, start_y)
+
+    def calculate_aligned_to_door(
+        self,
+        door_edge: Tuple[int, int],  # 门的边索引
+        door_position_ratio: float = 0.5,  # 门在边上的位置比例
+        align_gap: bool = True,  # True=缝对齐, False=砖中对齐
+    ) -> Dict[str, Any]:
+        """
+        核心功能：缝对齐门中
+        
+        参数：
+            door_edge: 门所在的边 (p1_idx, p2_idx)
+            door_position_ratio: 门在边上的位置 (0-1)
+            align_gap: True=缝对齐门中线, False=砖中线对齐门中线
+        """
+        p1 = self.room_pts[door_edge[0]]
+        p2 = self.room_pts[door_edge[1]]
+        
+        # 1. 计算门中心点（根据比例）
+        door_center_x = p1.x + (p2.x - p1.x) * door_position_ratio
+        door_center_y = p1.y + (p2.y - p1.y) * door_position_ratio
+        
+        # 2. 判断是横向边还是纵向边
+        edge_dx = abs(p2.x - p1.x)
+        edge_dy = abs(p2.y - p1.y)
+        is_horizontal_edge = edge_dx > edge_dy
+        
+        tile_w_gap = self.tile_w + self.gap
+        tile_h_gap = self.tile_h + self.gap
+        
+        # 3. 计算起铺点，让缝对齐门中心
+        if is_horizontal_edge:
+            # 横向边：在 Y 方向对齐
+            if align_gap:
+                # 缝对齐门中线
+                # 门的 Y 坐标应该
