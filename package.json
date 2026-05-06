@@ -1,0 +1,38 @@
+{
+  "name": "tilelayout-ai",
+  "version": "0.1.0",
+  "private": true,
+  "description": "排砖宝 - 瓷砖排版与销售闭环应用",
+  "keywords": [
+    "tile",
+    "layout",
+    "flooring",
+    "construction",
+    "design"
+  ],
+  "author": "TileLayout AI Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "type-check": "turbo run type-check",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "prepare": "husky install"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "eslint": "^8.56.0",
+    "husky": "^9.0.0",
+    "prettier": "^3.2.0",
+    "turbo": "^1.12.0",
+    "typescript": "^5.3.0"
+  },
+  "packageManager": "pnpm@8.15.0"
+}

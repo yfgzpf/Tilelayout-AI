@@ -1,0 +1,117 @@
+# ============================================================
+# 排砖宝 (TileLayout AI) - 腾讯云生产环境部署
+# ============================================================
+
+version: "3.8"
+
+services:
+  # ==================== PostgreSQL 数据库 ====================
+  postgres:
+    image: postgres:16-alpine
+    container_name: tilelayout-db
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER:-tilelayout}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME:-tilelayout}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-tilelayout} -d ${DB_NAME:-tilelayout}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend
+
+  # ==================== Redis 缓存 ====================
+  redis:
+    image: redis:7-alpine
+    container_name: tilelayout-redis
+    restart: always
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redisdata:/data
+    ports:
+      - "127.0.0.1:6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - backend
+
+  # ==================== FastAPI 后端 ====================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: tilelayout-api
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://${DB_USER:-tilelayout}:${DB_PASSWORD}@postgres:5432/${DB_NAME:-tilelayout}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
+      - JWT_SECRET=${JWT_SECRET}
+      - SECRET_KEY=${JWT_SECRET}
+      - CORS_ORIGINS=${CORS_ORIGINS:-https://app.paizhuanbao.com}
+      - COS_SECRET_ID=${COS_SECRET_ID}
+      - COS_SECRET_KEY=${COS_SECRET_KEY}
+      - COS_REGION=${COS_REGION:-ap-guangzhou}
+      - COS_BUCKET=${COS_BUCKET:-tilelayout-1250000000}
+      - MEMBER_REQUIRED=${MEMBER_REQUIRED:-true}
+      - ENVIRONMENT=production
+    volumes:
+      - uploads:/app/uploads
+      - ./backend:/app:ro
+    ports:
+      - "127.0.0.1:8000:8000"
+    networks:
+      - backend
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+  # ==================== Nginx 反向代理 ====================
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: tilelayout-nginx
+    restart: always
+    depends_on:
+      - backend
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - uploads:/usr/share/nginx/html/uploads:ro
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - backend
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "3"
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  pgdata:
+    driver: local
+  redisdata:
+    driver: local
+  uploads:
+    driver: local
