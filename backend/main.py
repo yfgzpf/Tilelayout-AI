@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 import os
 from app.core.config import settings
 from app.core.rate_limit import init_rate_limiter, rate_limit_sketch
-from app.api import auth, users, textures, products, projects, orders, confirmation, sketch, materials, store
+from app.api import auth, users, textures, products, projects, orders, confirmation, sketch, materials, store, ai_planner
 
 app = FastAPI(
     title="排砖宝 API",
@@ -39,6 +39,7 @@ app.include_router(confirmation.router, prefix="/api/v1/confirmations", tags=["�
 app.include_router(sketch.router, prefix="/api/v1/sketch", tags=["手绘识别"])
 app.include_router(materials.router, prefix="/api/v1/materials", tags=["辅料计算"])
 app.include_router(store.router, prefix="/api/v1/store", tags=["门店信息"])
+app.include_router(ai_planner.router)
 
 
 @app.get("/")
