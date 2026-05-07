@@ -13,13 +13,22 @@ export class ApiError extends Error {
 class ApiService {
   private token: string | null = null;
   setToken(t: string | null) { this.token = t; }
+  getToken(): string | null { return this.token; }
 
   private async request<T>(endpoint: string, opts: RequestInit = {}): Promise<T> {
     const url = `${API_BASE}${endpoint}`;
     const ctrl = new AbortController();
     const tid = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
-    const headers: Record<string, string> = opts.body ? { 'Content-Type': 'application/json' } : {};
+    const headers: Record<string, string> = {};
+    if (opts.body && opts.body instanceof FormData) {
+      // don't set Content-Type for FormData
+    } else if (opts.body) {
+      headers['Content-Type'] = 'application/json';
+    }
     if (this.token) headers['Authorization'] = `Bearer ${this.token}`;
+    if (opts.headers) {
+      Object.entries(opts.headers as Record<string, string>).forEach(([k, v]) => { headers[k] = v; });
+    }
 
     try {
       const resp = await fetch(url, { ...opts, headers, signal: ctrl.signal });
@@ -43,6 +52,44 @@ class ApiService {
   post<T>(url: string, data?: unknown) { return this.request<T>(url, { method: 'POST', body: data ? JSON.stringify(data) : undefined }); }
   put<T>(url: string, data?: unknown) { return this.request<T>(url, { method: 'PUT', body: data ? JSON.stringify(data) : undefined }); }
   delete<T>(url: string) { return this.request<T>(url, { method: 'DELETE' }); }
+
+  async upload<T>(endpoint: string, file: File | Blob): Promise<T> {
+    const url = `${API_BASE}${endpoint}`;
+    const ctrl = new AbortController();
+    const tid = setTimeout(() => ctrl.abort(), 30000);
+    const fd = new FormData();
+    fd.append('file', file);
+    const headers: Record<string, string> = {};
+    if (this.token) headers['Authorization'] = `Bearer ${this.token}`;
+    try {
+      const resp = await fetch(url, { method: 'POST', headers, body: fd, signal: ctrl.signal });
+      clearTimeout(tid);
+      if (!resp.ok) {
+        let msg = `上传失败(${resp.status})`;
+        try { const j = await resp.json(); msg = j.detail || j.message || msg; } catch {}
+        throw new ApiError(msg, resp.status);
+      }
+      return resp.json() as T;
+    } catch (err) {
+      clearTimeout(tid);
+      if (err instanceof ApiError) throw err;
+      if (err instanceof DOMException && err.name === 'AbortError') throw new ApiError('上传超时', 408);
+      throw new ApiError(err instanceof Error ? err.message : '上传失败', 0);
+    }
+  }
+
+  async downloadBlob(endpoint: string): Promise<Blob> {
+    const url = `${API_BASE}${endpoint}`;
+    const headers: Record<string, string> = {};
+    if (this.token) headers['Authorization'] = `Bearer ${this.token}`;
+    const resp = await fetch(url, { headers });
+    if (!resp.ok) {
+      let msg = `下载失败(${resp.status})`;
+      try { const j = await resp.json(); msg = j.detail || j.message || msg; } catch {}
+      throw new ApiError(msg, resp.status);
+    }
+    return resp.blob();
+  }
 }
 
 export const api = new ApiService();
@@ -55,22 +102,7 @@ export async function calculateLayout(projectId: string, payload: any) {
 }
 
 export async function sendSketch(file: File | Blob) {
-  const fd = new FormData();
-  fd.append('file', file);
-  const url = `${API_BASE}/sketch/recognize`;
-  const ctrl = new AbortController();
-  const tid = setTimeout(() => ctrl.abort(), 30000);
-  try {
-    const resp = await fetch(url, { method: 'POST', body: fd, signal: ctrl.signal });
-    clearTimeout(tid);
-    const text = await resp.text();
-    if (!resp.ok) throw new ApiError(`识别失败(${resp.status})`, resp.status);
-    return text ? JSON.parse(text) : { success: false };
-  } catch (err) {
-    clearTimeout(tid);
-    if (err instanceof ApiError) throw err;
-    throw new ApiError(err instanceof Error ? err.message : '网络错误', 0);
-  }
+  return api.upload<any>('/sketch/recognize', file);
 }
 
 export async function calcAuxiliaryMaterials(data: any) {

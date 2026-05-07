@@ -57,8 +57,14 @@ async def list_products(
 ):
     if user is None:
         return {"success": True, "data": [], "total": 0}
+    store_result = await db.execute(
+        select(StoreProfile).where(StoreProfile.user_id == user.id)
+    )
+    store = store_result.scalar_one_or_none()
+    if store is None:
+        return {"success": True, "data": [], "total": 0}
     result = await db.execute(
-        select(Product).order_by(Product.created_at.desc())
+        select(Product).where(Product.store_id == store.user_id).order_by(Product.created_at.desc())
     )
     products = result.scalars().all()
     data = []

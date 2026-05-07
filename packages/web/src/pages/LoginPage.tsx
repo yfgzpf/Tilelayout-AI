@@ -4,11 +4,13 @@ import { Button, Card, Form, Input, Typography, message } from 'antd';
 import { PhoneOutlined, LockOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import { Logo } from '../components/Logo';
 import { api } from '../services/api';
+import { useAppStore } from '../store';
 
 const { Title, Text } = Typography;
 
 const LoginPage: React.FC = () => {
   const nav = useNavigate();
+  const { setUser } = useAppStore();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
 
@@ -21,6 +23,15 @@ const LoginPage: React.FC = () => {
       });
       if (r?.access_token) {
         api.setToken(r.access_token);
+        localStorage.setItem('token', r.access_token);
+        localStorage.setItem('user_id', r.user_id || '');
+        setUser({
+          id: r.user_id || '',
+          phone: values.phone,
+          isMember: r.is_member ?? false,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
         message.success('登录成功');
         nav('/');
       } else {

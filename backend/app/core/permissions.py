@@ -31,6 +31,14 @@ async def get_current_user(
     return user
 
 
+async def require_user(
+    user: User | None = Depends(get_current_user),
+) -> User:
+    if user is None:
+        raise HTTPException(status_code=401, detail="请先登录")
+    return user
+
+
 async def require_member(
     user: User | None = Depends(get_current_user),
 ) -> User:

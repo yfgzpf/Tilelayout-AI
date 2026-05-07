@@ -1,0 +1,123 @@
+﻿
+============================================================
+排砖宝 · 端对端测试
+============================================================
+测试时间: 2026-05-06 23:41:01
+目标服务: http://127.0.0.1:8000
+============================================================
+
+[PASS] | 健康检查 (17ms)
+   -> {
+  "status": "healthy"
+}
+[PASS] | 用户注册 (418ms)
+   -> {
+  "phone": "13878082061",
+  "user_id": "91420038-9e48-4906-b069-d357ea2b0bfc"
+}
+[PASS] | 用户登录 (51ms)
+[PASS] | 项目创建 (153ms)
+   -> {
+  "project_id": "70e65a70-8e78-4054-b191-8654c459890d"
+}
+[PASS] | 排版计算 (178ms)
+   -> {
+  "total_tiles": 20,
+  "whole_tiles": 12,
+  "cut_tiles": 8,
+  "waste_percentage": 0.6,
+  "total_area_sq_mm": 12000000.0,
+  "total_area_sq_m": 12.0
+}
+[PASS] | 辅料计算 (4ms)
+   -> {
+  "items_count": 3
+}
+[PASS] | 完整报价单 (5ms)
+   -> {
+  "total_amount": 1720.0,
+  "items_count": 8
+}
+[PASS] | 踢脚线计算 (3ms)
+   -> {
+  "room_perimeter": 14.0,
+  "door_width": 1.5,
+  "actual_length": 12.5,
+  "skirting_height": 80,
+  "tiles_needed": 2,
+  "pieces_per_tile": 10,
+  "cost": 100.0,
+  "waste_rate": 0.05
+}
+[PASS] | 门头石计算 (4ms)
+   -> {
+  "thresholds": [
+    {
+      "door_id": "door1",
+      "length": 900,
+      "width": 250,
+      "material": "marble",
+      "cost": 180.0
+    },
+    {
+      "door_id": "door2",
+      "length": 800,
+      "width": 250,
+      "material": "marble",
+      "cost": 160.0
+    }
+  ],
+  "total_cost": 340.0
+}
+[PASS] | 智能排版优化 (5ms)
+   -> {
+  "plans_count": 3
+}
+[PASS] | API频率限制 (122ms)
+   -> {
+  "rate_limited_count": 6
+}
+[PASS] | 免费限制检查 (7ms)
+   -> {
+  "is_member": false
+}
+
+============================================================
+测试结果: 12/12 通过
+============================================================
+
+
+详细测试结果:
+------------------------------------------------------------
+[OK] 健康检查: 服务正常运行
+[OK] 用户注册: 注册成功，用户ID: 91420038-9e48-4906-b069-d357ea2b0bfc
+[OK] 用户登录: 登录接口响应正常
+[OK] 项目创建: 项目创建成功，ID: 70e65a70-8e78-4054-b191-8654c459890d
+[OK] 排版计算: 计算完成，整砖12片，切割砖8片
+[OK] 辅料计算: 计算完成，共3项辅料
+python : Traceback (most recent call last):
+所在位置 行:1 字符: 42
++ ... :\目录已检查\TileLayout AI\backend"; python tests/e2e_test.py 2>&1 | Out-F ...
++                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Traceback (most recent call last) 
+   ::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  File "F:\目录已检查\TileLayout AI\backend\tests\e2e_test.py", line 635, in <module
+>
+    exit_code = asyncio.run(main())
+  File "C:\Python314\Lib\asyncio\runners.py", line 204, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "C:\Python314\Lib\asyncio\runners.py", line 127, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Python314\Lib\asyncio\base_events.py", line 719, in run_until_comple
+te
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "F:\目录已检查\TileLayout AI\backend\tests\e2e_test.py", line 619, in main
+    print(f"{status} {r.name}: {r.message}")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'gbk' codec can't encode character '\xa5' in position 24: i
+llegal multibyte sequence

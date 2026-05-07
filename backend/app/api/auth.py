@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
 from app.core.security import get_password_hash, verify_password, create_access_token, decode_access_token
+from app.core.rate_limit import limiter
 from app.models.models import User
 from pydantic import BaseModel
 from sqlalchemy import select
@@ -28,7 +29,8 @@ class TokenResponse(BaseModel):
 
 
 @router.post("/register", response_model=TokenResponse)
-async def register(req: RegisterRequest, db: AsyncSession = Depends(get_db)):
+@limiter.limit("10/minute")
+async def register(req: RegisterRequest, request: Request, db: AsyncSession = Depends(get_db)):
     if len(req.phone) < 11:
         raise HTTPException(status_code=400, detail="请输入有效的手机号")
     if len(req.password) < 6:
@@ -56,7 +58,8 @@ async def register(req: RegisterRequest, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/login", response_model=TokenResponse)
-async def login(req: LoginRequest, db: AsyncSession = Depends(get_db)):
+@limiter.limit("10/minute")
+async def login(req: LoginRequest, request: Request, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(User).where(User.phone == req.phone))
     user = result.scalar_one_or_none()
 

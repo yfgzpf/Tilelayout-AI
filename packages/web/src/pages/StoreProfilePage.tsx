@@ -191,7 +191,6 @@ const StoreProfilePage: React.FC = () => {
             >
               <Input.TextArea 
                 placeholder="例如：广东省佛山市禅城区陶瓷产业创新中心B座12层" 
-                prefix={<EnvironmentOutlined />}
                 rows={3}
                 size="large"
               />

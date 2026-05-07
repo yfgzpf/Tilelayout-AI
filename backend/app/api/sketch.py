@@ -3,10 +3,11 @@
 
 上传手绘户型图, 返回 OpenCV 提取的轮廓 + OCR 数字
 """
-from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
+from fastapi import APIRouter, UploadFile, File, HTTPException, Depends, Request
 from pydantic import BaseModel
 from typing import Optional
 from app.core.permissions import get_current_user
+from app.core.rate_limit import limiter
 from app.models.models import User
 
 router = APIRouter()
@@ -18,7 +19,9 @@ class SketchResult(BaseModel):
 
 
 @router.post("/recognize")
+@limiter.limit("30/minute")
 async def recognize_sketch(
+    request: Request,
     file: UploadFile = File(...),
     fit_to_rectangle: bool = False,
     user: Optional[User] = Depends(get_current_user),

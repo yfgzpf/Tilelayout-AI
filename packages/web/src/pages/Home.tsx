@@ -1,7 +1,7 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Input, message, Modal, Form, Button, Tag, Spin, Alert, Space } from 'antd';
-import { SearchOutlined, ReloadOutlined, DeleteOutlined, ExclamationCircleOutlined, PlusOutlined, UserOutlined, CrownOutlined } from '@ant-design/icons';
+import { SearchOutlined, ReloadOutlined, DeleteOutlined, ExclamationCircleOutlined, PlusOutlined, UserOutlined, CrownOutlined, LogoutOutlined } from '@ant-design/icons';
 import { useAppStore } from '../store';
 import { fetchProjects, createProject, deleteProjectApi, api } from '../services/api';
 import { Logo, LogoIcon } from '../components/Logo';
@@ -25,21 +25,31 @@ const PRICING = [
 /* ========== MAIN COMPONENT ========== */
 const Home: React.FC = () => {
   const nav = useNavigate();
-  const { projects, setProjects, deleteProject } = useAppStore();
+  const { projects, setProjects, deleteProject, user, setUser } = useAppStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [createOpen, setCreateOpen] = useState(false);
   const [form] = Form.useForm();
+  const isLoggedIn = !!user?.id;
+
+  const handleLogout = useCallback(() => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user_id');
+    api.setToken(null);
+    setUser(null);
+    message.success('已退出登录');
+  }, [setUser]);
 
   const load = useCallback(async () => {
+    if (!localStorage.getItem('token')) return;
     setLoading(true); setError(null);
     try { const r = await fetchProjects(); setProjects(r?.data || (Array.isArray(r) ? r : [])); }
     catch (e: any) { setError(e.message); }
     finally { setLoading(false); }
   }, [setProjects]);
 
-  React.useEffect(() => { load(); }, [load]);
+  useEffect(() => { load(); }, [load]);
 
   const filtered = search ? projects.filter(p => p.name?.toLowerCase().includes(search.toLowerCase())) : projects;
 
@@ -51,13 +61,18 @@ const Home: React.FC = () => {
   }, [deleteProject]);
 
   const handleCreate = useCallback(async (v: { name: string }) => {
+    if (!localStorage.getItem('token')) {
+      message.warning('请先登录');
+      nav('/login');
+      return;
+    }
     try {
       setLoading(true);
       const r = await createProject({
         name: v.name,
         room_polygon: [[0,0],[3000,0],[3000,4000],[0,4000]],
         edges_annotated: [],
-        tile_config: { tileWidth: 800, tileHeight: 800, gapWidth: 3, direction: 'horizontal', startPoint: { x: 0, y: 0 } },
+        tile_config: { tile_width: 800, tile_height: 800, gap_width: 3, direction: 'horizontal', start_point: [0, 0] },
       });
       const pid = r?.data?.id;
       if (pid) {
@@ -81,8 +96,17 @@ const Home: React.FC = () => {
         </div>
         <Space size={12}>
           <Button size="small" icon={<CrownOutlined />} onClick={() => nav('/upgrade')} style={{ borderColor: '#d4a574', color: '#d4a574' }}>升级会员</Button>
-          <Button size="small" icon={<UserOutlined />} onClick={() => nav('/login')}>登录</Button>
-          <Button size="small" type="primary" onClick={() => nav('/register')}>注册</Button>
+          {isLoggedIn ? (
+            <>
+              <Button size="small" onClick={() => nav('/user/profile')}>我的账户</Button>
+              <Button size="small" icon={<LogoutOutlined />} onClick={handleLogout}>退出</Button>
+            </>
+          ) : (
+            <>
+              <Button size="small" icon={<UserOutlined />} onClick={() => nav('/login')}>登录</Button>
+              <Button size="small" type="primary" onClick={() => nav('/register')}>注册</Button>
+            </>
+          )}
         </Space>
       </div>
 

@@ -174,3 +174,7 @@ export const projectsApi = {
     return response.blob();
   },
 };
+
+export const createProject = (data: any) => projectsApi.create(data);
+export const getProjectById = (id: string) => projectsApi.get(id);
+export const updateProject = (id: string, data: any) => projectsApi.update(id, data);

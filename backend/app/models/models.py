@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Boolean, DateTime, ForeignKey, Integer, Numeric, Text, JSON
+from sqlalchemy import Column, String, Boolean, DateTime, ForeignKey, Integer, Numeric, Text, JSON, TypeDecorator, CHAR
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -6,10 +6,45 @@ import uuid
 from app.core.database import Base
 
 
+class GUID(TypeDecorator):
+    """Platform-independent GUID type.
+    Uses PostgreSQL's UUID type, otherwise uses
+    CHAR(32), storing as string.
+    """
+    impl = CHAR
+    cache_ok = True
+
+    def load_dialect_impl(self, dialect):
+        if dialect.name == 'postgresql':
+            return dialect.type_descriptor(UUID())
+        else:
+            return dialect.type_descriptor(CHAR(32))
+
+    def process_bind_param(self, value, dialect):
+        if value is None:
+            return value
+        elif dialect.name == 'postgresql':
+            return str(value)
+        else:
+            if isinstance(value, uuid.UUID):
+                return value.hex
+            else:
+                return uuid.UUID(value).hex
+
+    def process_result_value(self, value, dialect):
+        if value is None:
+            return value
+        else:
+            if isinstance(value, uuid.UUID):
+                return value
+            else:
+                return uuid.UUID(value) if len(str(value)) == 36 else uuid.UUID(hex=value)
+
+
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     phone = Column(String(20), unique=True, nullable=False, index=True)
     hashed_password = Column(String(255), nullable=False)
     is_member = Column(Boolean, default=False)
@@ -21,7 +56,6 @@ class User(Base):
 
     store_profile = relationship("StoreProfile", back_populates="user", uselist=False)
     textures = relationship("Texture", back_populates="owner")
-    products = relationship("Product", back_populates="store")
     projects = relationship("Project", back_populates="user")
     orders = relationship("Order", back_populates="store_user")
 
@@ -48,8 +82,8 @@ class StoreProfile(Base):
 class Texture(Base):
     __tablename__ = "textures"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    owner_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    owner_id = Column(GUID(), ForeignKey("users.id"), nullable=False)
     name = Column(String(200), nullable=False)
     original_image_url = Column(Text, nullable=False)
     processed_image_url = Column(Text, nullable=True)
@@ -64,13 +98,13 @@ class Texture(Base):
 class Product(Base):
     __tablename__ = "products"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     store_id = Column(
         UUID(as_uuid=True), ForeignKey("store_profiles.user_id"), nullable=False
     )
     name = Column(String(200), nullable=False)
     image_url = Column(Text, nullable=True)
-    texture_id = Column(UUID(as_uuid=True), ForeignKey("textures.id"), nullable=True)
+    texture_id = Column(GUID(), ForeignKey("textures.id"), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     store = relationship("StoreProfile", back_populates="products")
@@ -81,8 +115,8 @@ class Product(Base):
 class ProductSKU(Base):
     __tablename__ = "product_skus"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    product_id = Column(UUID(as_uuid=True), ForeignKey("products.id"), nullable=False)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    product_id = Column(GUID(), ForeignKey("products.id"), nullable=False)
     size_x_mm = Column(Integer, nullable=False)
     size_y_mm = Column(Integer, nullable=False)
     unit_price = Column(Numeric(10, 2), nullable=True)
@@ -95,12 +129,13 @@ class ProductSKU(Base):
 class Project(Base):
     __tablename__ = "projects"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    user_id = Column(GUID(), ForeignKey("users.id"), nullable=False)
     name = Column(String(200), nullable=False)
     room_polygon = Column(JSON, nullable=True)
     edges_annotated = Column(JSON, nullable=True)
     tile_config = Column(JSON, nullable=True)
+    components = Column(JSON, nullable=True)
     show_price = Column(Boolean, default=True)
     confirmation_data = Column(JSON, nullable=True)
     status = Column(String(20), default="draft")
@@ -117,9 +152,9 @@ class Project(Base):
 class LayoutResult(Base):
     __tablename__ = "layout_results"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    project_id = Column(UUID(as_uuid=True), ForeignKey("projects.id"), nullable=False)
-    texture_id = Column(UUID(as_uuid=True), ForeignKey("textures.id"), nullable=True)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    project_id = Column(GUID(), ForeignKey("projects.id"), nullable=False)
+    texture_id = Column(GUID(), ForeignKey("textures.id"), nullable=True)
     tiles = Column(JSON, nullable=True)
     statistics = Column(JSON, nullable=True)
     preview_image_url = Column(Text, nullable=True)
@@ -131,9 +166,9 @@ class LayoutResult(Base):
 class Order(Base):
     __tablename__ = "orders"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    project_id = Column(UUID(as_uuid=True), ForeignKey("projects.id"), nullable=False)
-    store_user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    project_id = Column(GUID(), ForeignKey("projects.id"), nullable=False)
+    store_user_id = Column(GUID(), ForeignKey("users.id"), nullable=False)
     customer_name = Column(String(100), nullable=True)
     customer_phone = Column(String(20), nullable=True)
     status = Column(String(20), default="draft")
@@ -151,13 +186,13 @@ class Order(Base):
 class OrderItem(Base):
     __tablename__ = "order_items"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    order_id = Column(UUID(as_uuid=True), ForeignKey("orders.id"), nullable=False)
-    sku_id = Column(UUID(as_uuid=True), ForeignKey("product_skus.id"), nullable=False)
-    texture_id = Column(UUID(as_uuid=True), ForeignKey("textures.id"), nullable=False)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    order_id = Column(GUID(), ForeignKey("orders.id"), nullable=False)
+    sku_id = Column(GUID(), ForeignKey("product_skus.id"), nullable=False)
+    texture_id = Column(GUID(), ForeignKey("textures.id"), nullable=False)
     quantity_whole = Column(Integer, nullable=False)
     quantity_cut = Column(Integer, nullable=False)
     price_per_piece = Column(Numeric(10, 2), nullable=False)
-    layout_snapshot = Column(JSONB, nullable=True)
+    layout_snapshot = Column(JSON, nullable=True)
 
     order = relationship("Order", back_populates="items")

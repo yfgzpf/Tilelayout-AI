@@ -4,11 +4,13 @@ import { Button, Card, Form, Input, Typography, message } from 'antd';
 import { PhoneOutlined, LockOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import { Logo } from '../components/Logo';
 import { api } from '../services/api';
+import { useAppStore } from '../store';
 
 const { Title, Text } = Typography;
 
 const RegisterPage: React.FC = () => {
   const nav = useNavigate();
+  const { setUser } = useAppStore();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
 
@@ -19,12 +21,27 @@ const RegisterPage: React.FC = () => {
     }
     setLoading(true);
     try {
-      await api.post('/auth/register', {
+      const r = await api.post('/auth/register', {
         phone: values.phone,
         password: values.password,
       });
-      message.success('注册成功，请登录');
-      nav('/login');
+      if (r?.access_token) {
+        api.setToken(r.access_token);
+        localStorage.setItem('token', r.access_token);
+        localStorage.setItem('user_id', r.user_id || '');
+        setUser({
+          id: r.user_id || '',
+          phone: values.phone,
+          isMember: r.is_member ?? false,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
+        message.success('注册成功');
+        nav('/');
+      } else {
+        message.success('注册成功，请登录');
+        nav('/login');
+      }
     } catch (e: any) {
       message.error(e.message || '注册失败');
     } finally {

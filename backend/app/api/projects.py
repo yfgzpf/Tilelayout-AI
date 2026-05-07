@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, delete
 from sqlalchemy.orm import selectinload
 from app.core.database import get_db
-from app.core.permissions import get_current_user
+from app.core.permissions import get_current_user, require_user
 from app.services.layout_engine import calculate_tile_layout
 from app.models.models import Project, User, LayoutResult, Texture
 from pydantic import BaseModel, Field
@@ -27,11 +27,24 @@ class TileConfig(BaseModel):
     start_point: Tuple[float, float] = (0, 0)
 
 
+class RoomComponentData(BaseModel):
+    id: str
+    type: str = Field(..., pattern="^(door|window|column|bay_window|pillar|wall_opening)$")
+    x: float
+    y: float
+    width: float
+    height: float
+    rotation: float = 0
+    label: str = ""
+    properties: Dict[str, Any] = {}
+
+
 class ProjectCreate(BaseModel):
     name: str = Field(..., min_length=2, max_length=200)
     room_polygon: List[List[float]] = []
     edges_annotated: Optional[List[dict]] = None
     tile_config: Optional[TileConfig] = None
+    components: Optional[List[RoomComponentData]] = []
 
 
 class ProjectUpdate(BaseModel):
@@ -40,6 +53,7 @@ class ProjectUpdate(BaseModel):
     edges_annotated: Optional[List[dict]] = None
     tile_config: Optional[TileConfig] = None
     status: Optional[str] = None
+    components: Optional[List[RoomComponentData]] = None
 
 
 class CalculateLayoutRequest(BaseModel):
@@ -77,7 +91,7 @@ class LayoutResultResponse(BaseModel):
 async def list_projects(
     skip: int = 0,
     limit: int = 20,
-    user: User = Depends(get_current_user),
+    user: User = Depends(require_user),
     db: AsyncSession = Depends(get_db),
 ):
     """获取当前用户的项目列表"""
@@ -112,7 +126,7 @@ async def list_projects(
 @router.post("/")
 async def create_project(
     project_data: ProjectCreate,
-    user: User = Depends(get_current_user),
+    user: User = Depends(require_user),
     db: AsyncSession = Depends(get_db),
 ):
     """创建新项目"""
@@ -126,12 +140,17 @@ async def create_project(
             "startPoint": list(project_data.tile_config.start_point),
         }
     
+    components_dict = None
+    if project_data.components:
+        components_dict = [c.model_dump() for c in project_data.components]
+    
     project = Project(
         user_id=user.id,
         name=project_data.name,
         room_polygon=project_data.room_polygon,
         edges_annotated=project_data.edges_annotated,
         tile_config=tile_config_dict,
+        components=components_dict,
         status="draft",
     )
     
@@ -147,6 +166,7 @@ async def create_project(
             "roomPolygon": project.room_polygon or [],
             "edgesAnnotated": project.edges_annotated,
             "tileConfig": project.tile_config,
+            "components": project.components or [],
             "status": project.status,
             "showPrice": project.show_price,
             "createdAt": project.created_at.isoformat(),
@@ -183,6 +203,7 @@ async def get_project(
             "roomPolygon": project.room_polygon or [],
             "edgesAnnotated": project.edges_annotated,
             "tileConfig": project.tile_config,
+            "components": project.components or [],
             "status": project.status,
             "showPrice": project.show_price,
             "confirmationData": project.confirmation_data,
@@ -232,6 +253,8 @@ async def update_project(
         }
     if "status" in update_data:
         project.status = update_data["status"]
+    if "components" in update_data:
+        project.components = [c.model_dump() if hasattr(c, 'model_dump') else c for c in update_data["components"]]
     
     await db.commit()
     await db.refresh(project)
@@ -244,6 +267,7 @@ async def update_project(
             "roomPolygon": project.room_polygon or [],
             "edgesAnnotated": project.edges_annotated,
             "tileConfig": project.tile_config,
+            "components": project.components or [],
             "status": project.status,
             "showPrice": project.show_price,
             "createdAt": project.created_at.isoformat(),
@@ -441,18 +465,84 @@ async def export_pdf(
     db: AsyncSession = Depends(get_db),
 ):
     """导出 PDF"""
+    from fastapi.responses import StreamingResponse
+    from io import BytesIO
+    from app.services.pdf_generator import create_confirmation_pdf
+
     try:
         pid = uuid.UUID(project_id)
     except ValueError:
         raise HTTPException(status_code=400, detail="无效的项目ID")
-    
-    return {
-        "success": True,
-        "data": {
-            "message": "PDF 导出功能开发中",
-            "downloadUrl": f"/api/v1/projects/{project_id}/export/pdf/download",
-        },
+
+    result = await db.execute(
+        select(Project).where(Project.id == pid, Project.user_id == user.id)
+    )
+    project = result.scalar_one_or_none()
+    if not project:
+        raise HTTPException(status_code=404, detail="项目不存在")
+
+    tile_config = project.tile_config or {}
+    room_polygon = project.room_polygon or []
+    import math
+    if len(room_polygon) >= 3:
+        xs = [p[0] for p in room_polygon]
+        ys = [p[1] for p in room_polygon]
+        area_sq_m = (max(xs) - min(xs)) / 1000.0 * (max(ys) - min(ys)) / 1000.0
+    else:
+        area_sq_m = 12.0
+
+    from app.services.auxiliary_material import AuxiliaryCalculator
+    aux_result = AuxiliaryCalculator.calculate_all(
+        area_sq_m=area_sq_m,
+        tile_width_mm=tile_config.get("tile_width", tile_config.get("tileWidth", 800)),
+        tile_height_mm=tile_config.get("tile_height", tile_config.get("tileHeight", 800)),
+        gap_width_mm=tile_config.get("gap_width", tile_config.get("gapWidth", 3)),
+    )
+
+    materials = [{"name": item["name"], "qty": item["qty"], "unit": item["unit"], "unit_price": item.get("unit_price", 0), "amount": item["amount"]} for item in aux_result.cost_items]
+
+    is_member = user.is_member
+    store_info = None
+    if is_member:
+        from app.models.models import StoreProfile
+        store_result = await db.execute(select(StoreProfile).where(StoreProfile.user_id == user.id))
+        store = store_result.scalar_one_or_none()
+        if store:
+            store_info = {"store_name": store.store_name, "phone": store.phone, "address": store.address, "logo_url": store.logo_url}
+
+    show_price = project.show_price if hasattr(project, 'show_price') else True
+
+    layout_result_data = None
+    layout_db_result = await db.execute(
+        select(LayoutResult).where(LayoutResult.project_id == pid).order_by(LayoutResult.created_at.desc()).limit(1)
+    )
+    layout_row = layout_db_result.scalar_one_or_none()
+    if layout_row:
+        layout_result_data = {"statistics": layout_row.statistics or {}}
+
+    project_data = {
+        "project_name": project.name or "未命名方案",
+        "area_sq_m": area_sq_m,
+        "project_id": project_id[:8].upper(),
+        "statistics": layout_result_data.get("statistics", {}) if layout_result_data else {},
     }
+
+    pdf_buf = create_confirmation_pdf(
+        project_data=project_data,
+        is_member=is_member,
+        store_profile=store_info,
+        materials=materials,
+        auxiliary_materials={"cost_items": aux_result.cost_items} if hasattr(aux_result, 'cost_items') else None,
+        show_price=show_price and is_member,
+    )
+
+    pdf_bytes = pdf_buf.getvalue() if hasattr(pdf_buf, 'getvalue') else pdf_buf
+
+    return StreamingResponse(
+        BytesIO(pdf_bytes),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename={project.name or 'confirmation'}.pdf"},
+    )
 
 
 @router.get("/{project_id}/export/ppt")
@@ -462,15 +552,80 @@ async def export_ppt(
     db: AsyncSession = Depends(get_db),
 ):
     """导出 PPT"""
+    from fastapi.responses import StreamingResponse
+    from io import BytesIO
+    from app.services.ppt_generator import create_confirmation_ppt
+
     try:
         pid = uuid.UUID(project_id)
     except ValueError:
         raise HTTPException(status_code=400, detail="无效的项目ID")
-    
-    return {
-        "success": True,
-        "data": {
-            "message": "PPT 导出功能开发中",
-            "downloadUrl": f"/api/v1/projects/{project_id}/export/ppt/download",
-        },
+
+    result = await db.execute(
+        select(Project).where(Project.id == pid, Project.user_id == user.id)
+    )
+    project = result.scalar_one_or_none()
+    if not project:
+        raise HTTPException(status_code=404, detail="项目不存在")
+
+    tile_config = project.tile_config or {}
+    room_polygon = project.room_polygon or []
+    if len(room_polygon) >= 3:
+        xs = [p[0] for p in room_polygon]
+        ys = [p[1] for p in room_polygon]
+        area_sq_m = (max(xs) - min(xs)) / 1000.0 * (max(ys) - min(ys)) / 1000.0
+    else:
+        area_sq_m = 12.0
+
+    from app.services.auxiliary_material import AuxiliaryCalculator
+    aux_result = AuxiliaryCalculator.calculate_all(
+        area_sq_m=area_sq_m,
+        tile_width_mm=tile_config.get("tile_width", tile_config.get("tileWidth", 800)),
+        tile_height_mm=tile_config.get("tile_height", tile_config.get("tileHeight", 800)),
+        gap_width_mm=tile_config.get("gap_width", tile_config.get("gapWidth", 3)),
+    )
+
+    materials = [{"name": item["name"], "qty": item["qty"], "unit": item["unit"], "unit_price": item.get("unit_price", 0), "amount": item["amount"]} for item in aux_result.cost_items]
+
+    is_member = user.is_member
+    store_info = None
+    if is_member:
+        from app.models.models import StoreProfile
+        store_result = await db.execute(select(StoreProfile).where(StoreProfile.user_id == user.id))
+        store = store_result.scalar_one_or_none()
+        if store:
+            store_info = {"store_name": store.store_name, "phone": store.phone, "address": store.address, "logo_url": store.logo_url}
+
+    show_price = project.show_price if hasattr(project, 'show_price') else True
+
+    layout_result_data = None
+    layout_db_result = await db.execute(
+        select(LayoutResult).where(LayoutResult.project_id == pid).order_by(LayoutResult.created_at.desc()).limit(1)
+    )
+    layout_row = layout_db_result.scalar_one_or_none()
+    if layout_row:
+        layout_result_data = {"statistics": layout_row.statistics or {}}
+
+    project_data = {
+        "project_name": project.name or "未命名方案",
+        "area_sq_m": area_sq_m,
+        "project_id": project_id[:8].upper(),
+        "statistics": layout_result_data.get("statistics", {}) if layout_result_data else {},
     }
+
+    ppt_buf = create_confirmation_ppt(
+        project_data=project_data,
+        is_member=is_member,
+        store_profile=store_info,
+        materials=materials,
+        auxiliary_materials={"cost_items": aux_result.cost_items} if hasattr(aux_result, 'cost_items') else None,
+        show_price=show_price and is_member,
+    )
+
+    ppt_bytes = ppt_buf.getvalue() if hasattr(ppt_buf, 'getvalue') else ppt_buf
+
+    return StreamingResponse(
+        BytesIO(ppt_bytes),
+        media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        headers={"Content-Disposition": f"attachment; filename={project.name or 'confirmation'}.pptx"},
+    )

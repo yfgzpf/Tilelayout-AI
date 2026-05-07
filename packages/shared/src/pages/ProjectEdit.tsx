@@ -19,6 +19,7 @@ import {
   Collapse,
   Switch,
   Tooltip,
+  Tag,
 } from 'antd';
 import {
   SaveOutlined,
@@ -27,8 +28,12 @@ import {
   CalculatorOutlined,
   SettingOutlined,
   AimOutlined,
+  DoorOutlined,
+  ScissorOutlined,
+  ColumnHeightOutlined,
+  ApartmentOutlined,
 } from '@ant-design/icons';
-import RoomEditor from '../components/RoomEditor/RoomEditor';
+import RoomEditor, { RoomComponent } from '../components/RoomEditor/RoomEditor';
 import { projectsApi } from '../services';
 import { useAppStore } from '../store';
 
@@ -76,6 +81,8 @@ const ProjectEdit: React.FC = () => {
   const [tilePreset, setTilePreset] = useState<string>('800×800mm');
   const [autoCalculate, setAutoCalculate] = useState(true);
   const [layoutResult, setLayoutResult] = useState<any>(null);
+  const [components, setComponents] = useState<RoomComponent[]>([]);
+  const [activeTab, setActiveTab] = useState('edit');
 
   const isNew = !id || id === 'new';
 
@@ -99,6 +106,10 @@ const ProjectEdit: React.FC = () => {
       });
       
       setRoomPolygon(project.roomPolygon || []);
+      if (project.components) {
+        setComponents(project.components as RoomComponent[]);
+      }
+      
       setCurrentProject(project);
       
       const preset = TILE_PRESETS.find(
@@ -135,13 +146,17 @@ const ProjectEdit: React.FC = () => {
     setRoomDimensions(dims);
   }, []);
 
+  const handleComponentsChange = useCallback((newComponents: RoomComponent[]) => {
+    setComponents(newComponents);
+  }, []);
+
   const handleSave = async () => {
     try {
       setSaving(true);
       const values = await form.validateFields();
       
       if (roomPolygon.length < 3) {
-        message.warning('请先绘制户型轮廓（至少 3 个顶点）');
+        message.warning('请先绘制户型轮廓（至少3个顶点）');
         return;
       }
       
@@ -158,52 +173,18 @@ const ProjectEdit: React.FC = () => {
         roomPolygon,
         edgesAnnotated: [],
         tileConfig,
+        components,
       };
 
       if (isNew) {
         const newProject = await projectsApi.create(projectData);
         message.success('项目创建成功');
         setCurrentProject(newProject);
-        
-        // 创建成功后自动执行排版计算
-        if (autoCalculate) {
-          try {
-            const result = await projectsApi.calculateLayout(newProject.id, {
-              textureId: undefined,
-              config: tileConfig,
-              optimize: false,
-            });
-            setLayoutResult(result);
-            message.success('排版计算完成');
-          } catch (calcErr) {
-            console.error('自动排版计算失败:', calcErr);
-            message.warning('项目已保存，但排版计算失败');
-          }
-        }
-        
-        navigate(`/project/${newProject.id}/preview`);
+        navigate(`/project/${newProject.id}`);
       } else {
         const updatedProject = await projectsApi.update(id!, projectData);
         message.success('项目保存成功');
         setCurrentProject(updatedProject);
-        
-        // 更新成功后自动执行排版计算
-        if (autoCalculate) {
-          try {
-            const result = await projectsApi.calculateLayout(id!, {
-              textureId: undefined,
-              config: tileConfig,
-              optimize: false,
-            });
-            setLayoutResult(result);
-            message.success('排版计算完成');
-          } catch (calcErr) {
-            console.error('自动排版计算失败:', calcErr);
-            message.warning('项目已保存，但排版计算失败');
-          }
-        }
-        
-        navigate(`/project/${id}/preview`);
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : '保存失败';
@@ -236,7 +217,7 @@ const ProjectEdit: React.FC = () => {
       
       setLayoutResult(result);
       message.success('排版计算完成');
-      navigate(`/project/${id}/preview`);
+      setActiveTab('preview');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : '排版计算失败';
       message.error(errorMessage);
@@ -266,6 +247,7 @@ const ProjectEdit: React.FC = () => {
           direction: values.direction,
           startPoint: { x: 0, y: 0 },
         },
+        components,
       };
       
       let projectId = id;
@@ -288,6 +270,7 @@ const ProjectEdit: React.FC = () => {
       
       setLayoutResult(result);
       message.success('快速排版完成');
+      setActiveTab('preview');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : '排版计算失败';
       message.error(errorMessage);
@@ -295,6 +278,13 @@ const ProjectEdit: React.FC = () => {
       setLoadingState(false);
     }
   };
+
+  const componentStats = useMemo(() => ({
+    doors: components.filter(c => c.type === 'door').length,
+    windows: components.filter(c => c.type === 'window').length,
+    columns: components.filter(c => c.type === 'column').length,
+    bayWindows: components.filter(c => c.type === 'bay_window').length,
+  }), [components]);
 
   if (loading && !isNew) {
     return (
@@ -343,212 +333,160 @@ const ProjectEdit: React.FC = () => {
           </Space>
         </div>
 
-        <Row gutter={[16, 16]}>
-          <Col xs={24} lg={16}>
-            <Card 
-              title="户型编辑" 
-              className="h-full"
-              extra={
-                roomDimensions && (
-                  <Text type="secondary">
-                    房间: {roomDimensions.width.toFixed(0)} × {roomDimensions.height.toFixed(0)} mm
-                  </Text>
-                )
-              }
-            >
-              <RoomEditor
-                polygon={roomPolygon}
-                onChange={setRoomPolygon}
-                width={800}
-                height={500}
-                showDimensions={true}
-                onDimensionsChange={handleRoomDimensionsChange}
-                showTilePreview={false}
-                showPreview={false}
-              />
-            </Card>
-          </Col>
-
-          <Col xs={24} lg={8}>
-            <Card title="项目配置" className="mb-4">
-              <Form
-                form={form}
-                layout="vertical"
-                initialValues={{
-                  name: '',
-                  tileWidth: 800,
-                  tileHeight: 800,
-                  gapWidth: 3,
-                  direction: 'horizontal',
-                }}
-              >
-                <Form.Item
-                  label="项目名称"
-                  name="name"
-                  rules={[
-                    { required: true, message: '请输入项目名称' },
-                    { min: 2, message: '项目名称至少2个字符' },
-                  ]}
+        <Tabs activeKey={activeTab} onChange={setActiveTab}>
+          <Tabs.TabPane tab="户型编辑" key="edit">
+            <Row gutter={[16, 16]}>
+              <Col xs={24} lg={16}>
+                <Card 
+                  title={
+                    <Space>
+                      <span>户型编辑</span>
+                      {roomDimensions && (
+                        <Text type="secondary" style={{ fontSize: 12 }}>
+                          房间: {roomDimensions.width.toFixed(0)} × {roomDimensions.height.toFixed(0)} mm
+                          ({(roomDimensions.width * roomDimensions.height / 1000000).toFixed(2)} m²)
+                        </Text>
+                      )}
+                    </Space>
+                  }
+                  extra={
+                    <Space size={2}>
+                      {componentStats.doors > 0 && <Tag color="blue" icon={<DoorOutlined />}>门{componentStats.doors}</Tag>}
+                      {componentStats.windows > 0 && <Tag color="green" icon={<ScissorOutlined />}>窗{componentStats.windows}</Tag>}
+                      {componentStats.columns > 0 && <Tag color="red" icon={<ColumnHeightOutlined />}>柱{componentStats.columns}</Tag>}
+                      {componentStats.bayWindows > 0 && <Tag color="purple" icon={<ApartmentOutlined />}>飘窗{componentStats.bayWindows}</Tag>}
+                    </Space>
+                  }
                 >
-                  <Input placeholder="例如：客厅地砖" maxLength={100} showCount />
-                </Form.Item>
+                  <RoomEditor
+                    polygon={roomPolygon}
+                    onChange={setRoomPolygon}
+                    width={900}
+                    height={550}
+                    showDimensions={false}
+                    onDimensionsChange={handleRoomDimensionsChange}
+                    onComponentsChange={handleComponentsChange}
+                    tileConfig={{
+                      tileWidth: form.getFieldValue('tileWidth') || 800,
+                      tileHeight: form.getFieldValue('tileHeight') || 800,
+                      gapWidth: form.getFieldValue('gapWidth') || 3,
+                      direction: form.getFieldValue('direction') || 'horizontal',
+                    }}
+                  />
+                </Card>
+              </Col>
 
-                <Divider orientation="left">瓷砖规格</Divider>
-
-                <Form.Item label="快速选择">
-                  <Select
-                    value={tilePreset}
-                    onChange={handleTilePresetChange}
-                    style={{ width: '100%' }}
+              <Col xs={24} lg={8}>
+                <Card title="项目配置" className="mb-4">
+                  <Form
+                    form={form}
+                    layout="vertical"
+                    initialValues={{
+                      name: '',
+                      tileWidth: 800,
+                      tileHeight: 800,
+                      gapWidth: 3,
+                      direction: 'horizontal',
+                    }}
                   >
-                    {TILE_PRESETS.map(preset => (
-                      <Option key={preset.label} value={preset.label}>
-                        {preset.label}
-                      </Option>
-                    ))}
-                    <Option value="custom">自定义尺寸</Option>
-                  </Select>
-                </Form.Item>
-
-                <Row gutter={16}>
-                  <Col span={12}>
                     <Form.Item
-                      label="宽度 (mm)"
-                      name="tileWidth"
+                      label="方案名称"
+                      name="name"
                       rules={[
-                        { required: true, message: '请输入宽度' },
-                        { type: 'number', min: 50, max: 3000, message: '50-3000mm' },
+                        { required: true, message: '请输入方案名称' },
+                        { min: 2, message: '名称至少2个字符' },
                       ]}
                     >
-                      <InputNumber
-                        style={{ width: '100%' }}
-                        min={50}
-                        max={3000}
-                        step={50}
-                        placeholder="宽度"
-                        disabled={tilePreset !== 'custom'}
-                      />
+                      <Input placeholder="例如：客厅800×800亮光砖" maxLength={100} showCount />
                     </Form.Item>
-                  </Col>
-                  <Col span={12}>
-                    <Form.Item
-                      label="高度 (mm)"
-                      name="tileHeight"
-                      rules={[
-                        { required: true, message: '请输入高度' },
-                        { type: 'number', min: 50, max: 3000, message: '50-3000mm' },
-                      ]}
-                    >
-                      <InputNumber
-                        style={{ width: '100%' }}
-                        min={50}
-                        max={3000}
-                        step={50}
-                        placeholder="高度"
-                        disabled={tilePreset !== 'custom'}
-                      />
+
+                    <Divider orientation="left">瓷砖规格</Divider>
+
+                    <Form.Item label="快速选择">
+                      <Select value={tilePreset} onChange={handleTilePresetChange} style={{ width: '100%' }}>
+                        {TILE_PRESETS.map(preset => (
+                          <Option key={preset.label} value={preset.label}>{preset.label}</Option>
+                        ))}
+                        <Option value="custom">自定义尺寸</Option>
+                      </Select>
                     </Form.Item>
-                  </Col>
-                </Row>
 
-                <Divider orientation="left">铺贴设置</Divider>
+                    <Row gutter={16}>
+                      <Col span={12}>
+                        <Form.Item label="宽度(mm)" name="tileWidth" rules={[{ required: true, message: '必填' }]}>
+                          <InputNumber style={{ width: '100%' }} min={50} max={3000} step={50} disabled={tilePreset !== 'custom'} />
+                        </Form.Item>
+                      </Col>
+                      <Col span={12}>
+                        <Form.Item label="高度(mm)" name="tileHeight" rules={[{ required: true, message: '必填' }]}>
+                          <InputNumber style={{ width: '100%' }} min={50} max={3000} step={50} disabled={tilePreset !== 'custom'} />
+                        </Form.Item>
+                      </Col>
+                    </Row>
 
-                <Form.Item
-                  label="留缝宽度 (mm)"
-                  name="gapWidth"
-                  rules={[
-                    { required: true, message: '请输入留缝宽度' },
-                    { type: 'number', min: 0, max: 20, message: '0-20mm' },
-                  ]}
-                >
-                  <InputNumber
-                    style={{ width: '100%' }}
-                    min={0}
-                    max={20}
-                    step={0.5}
-                    placeholder="留缝宽度"
-                  />
-                </Form.Item>
+                    <Divider orientation="left">铺贴设置</Divider>
 
-                <Form.Item
-                  label="铺贴方向"
-                  name="direction"
-                  rules={[{ required: true, message: '请选择铺贴方向' }]}
-                >
-                  <Select placeholder="选择铺贴方向">
-                    <Option value="horizontal">横向铺贴</Option>
-                    <Option value="vertical">纵向铺贴</Option>
-                    <Option value="diagonal">斜向铺贴 (45°)</Option>
-                  </Select>
-                </Form.Item>
+                    <Form.Item label="留缝宽度(mm)" name="gapWidth" rules={[{ required: true }]}>
+                      <InputNumber style={{ width: '100%' }} min={0} max={20} step={0.5} />
+                    </Form.Item>
 
-                <Form.Item label="自动计算排版">
-                  <Switch
-                    checked={autoCalculate}
-                    onChange={setAutoCalculate}
-                    checkedChildren="开"
-                    unCheckedChildren="关"
-                  />
-                  <Text type="secondary" className="ml-2">
-                    保存后自动计算排版
-                  </Text>
-                </Form.Item>
-              </Form>
-            </Card>
+                    <Form.Item label="铺贴方向" name="direction" rules={[{ required: true }]}>
+                      <Select placeholder="选择方向">
+                        <Option value="horizontal">横向铺贴</Option>
+                        <Option value="vertical">纵向铺贴</Option>
+                        <Option value="diagonal">斜向铺贴 (45°)</Option>
+                      </Select>
+                    </Form.Item>
+                  </Form>
+                </Card>
 
-            {layoutResult && (
-              <Card title="排版预览" size="small" className="mb-4">
-                <Space direction="vertical" className="w-full">
-                  <Row gutter={[8, 8]}>
-                    <Col span={12}>
-                      <Text type="secondary">总砖数:</Text>
-                      <Text strong className="ml-2">
-                        {layoutResult.statistics?.totalTiles || 0} 片
-                      </Text>
-                    </Col>
-                    <Col span={12}>
-                      <Text type="secondary">整砖数:</Text>
-                      <Text strong className="ml-2">
-                        {layoutResult.statistics?.wholeTiles || 0} 片
-                      </Text>
-                    </Col>
-                    <Col span={12}>
-                      <Text type="secondary">切割砖:</Text>
-                      <Text strong className="ml-2">
-                        {layoutResult.statistics?.cutTiles || 0} 片
-                      </Text>
-                    </Col>
-                    <Col span={12}>
-                      <Text type="secondary">损耗率:</Text>
-                      <Text strong className="ml-2">
-                        {layoutResult.statistics?.wastePercentage?.toFixed(1) || 0}%
-                      </Text>
-                    </Col>
-                  </Row>
-                  <Button
-                    type="primary"
-                    block
-                    onClick={() => navigate(`/project/${id}/preview`)}
-                  >
-                    查看详细排版
-                  </Button>
-                </Space>
+                {layoutResult && (
+                  <Card title="排版结果" size="small" className="mb-4">
+                    <Row gutter={[8, 8]}>
+                      <Col span={12}><Text type="secondary">总砖数:</Text><Text strong>{layoutResult.statistics?.totalTiles || 0} 片</Text></Col>
+                      <Col span={12}><Text type="secondary">整砖:</Text><Text strong>{layoutResult.statistics?.wholeTiles || 0} 片</Text></Col>
+                      <Col span={12}><Text type="secondary">切割:</Text><Text strong>{layoutResult.statistics?.cutTiles || 0} 片</Text></Col>
+                      <Col span={12}><Text type="secondary">损耗:</Text><Text strong>{layoutResult.statistics?.wastePercentage?.toFixed(1) || 0}%</Text></Col>
+                    </Row>
+                    <Button type="primary" block onClick={() => setActiveTab('preview')} className="mt-2">
+                      查看详细排版
+                    </Button>
+                  </Card>
+                )}
+
+                <Card title="操作提示" size="small">
+                  <ul className="list-disc list-inside space-y-1 text-sm text-gray-600">
+                    <li><strong>选择模式</strong>: 拖拽画布平移，滚轮缩放</li>
+                    <li><strong>画墙模式</strong>: 点击添加顶点绘制轮廓</li>
+                    <li><strong>门/窗/柱</strong>: 点击放置参数化构件</li>
+                    <li><strong>右键</strong>: 退出当前工具/绘制模式</li>
+                    <li><strong>双击顶点</strong>: 删除该顶点</li>
+                    <li><strong>Delete</strong>: 删除选中构件</li>
+                  </ul>
+                </Card>
+              </Col>
+            </Row>
+          </Tabs.TabPane>
+
+          <Tabs.TabPane tab="排版预览" key="preview" disabled={!layoutResult}>
+            {!layoutResult ? (
+              <Card>
+                <Alert 
+                  message="暂无排版数据" 
+                  description="请先绘制户型并点击「快速排版」或「预览排版」按钮" 
+                  type="info" 
+                  showIcon 
+                />
+              </Card>
+            ) : (
+              <Card title="排版结果详情">
+                <pre style={{ background: '#f5f5f5', padding: 16, borderRadius: 8 }}>
+                  {JSON.stringify(layoutResult, null, 2)}
+                </pre>
               </Card>
             )}
-
-            <Card title="操作提示" size="small">
-              <ul className="list-disc list-inside space-y-2 text-sm text-gray-600">
-                <li>在左侧画布上绘制户型轮廓</li>
-                <li>点击顶点可拖动调整位置</li>
-                <li>双击顶点可删除</li>
-                <li>右键可退出绘制模式</li>
-                <li>滚轮缩放画布</li>
-                <li>填写右侧瓷砖规格信息</li>
-                <li>保存后可预览排版效果</li>
-              </ul>
-            </Card>
-          </Col>
-        </Row>
+          </Tabs.TabPane>
+        </Tabs>
       </div>
     </div>
   );

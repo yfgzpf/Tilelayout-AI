@@ -170,6 +170,8 @@ async def get_order(
     order = result.scalar_one_or_none()
     if order is None:
         raise HTTPException(status_code=404, detail="订单不存在")
+    if order.store_user_id != user.id:
+        raise HTTPException(status_code=403, detail="无权访问此订单")
 
     items_result = await db.execute(select(OrderItem).where(OrderItem.order_id == order.id))
     items = items_result.scalars().all()
@@ -210,6 +212,8 @@ async def update_order_status(
     order = result.scalar_one_or_none()
     if order is None:
         raise HTTPException(status_code=404, detail="订单不存在")
+    if order.store_user_id != user.id:
+        raise HTTPException(status_code=403, detail="无权操作此订单")
 
     order.status = status
     if status == "confirmed":
